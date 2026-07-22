@@ -1,5 +1,81 @@
-Yrityksemme nimi on EkAI Oy.
-Olemme avoinna maanantaista perjantaihin klo 9-17.
-Tarjoamme AI-chatbot-palveluita yrityksille.
-Hinnoittelu alkaa 199€/kk.
-Asiakaspalvelu: tuki@esimerkki.fi
+YRITYKSEN PERUSTIEDOT
+
+Yrityksen nimi: Turun Lukko Oy
+Toimiala: Lukkosepänliike ja turvallisuuspalvelut
+Perustettu: 1998
+Sijainti: Kauppiaskatu 12, 20100 Turku
+Toimialue: Turku ja lähikunnat (Kaarina, Raisio, Naantali, Lieto)
+
+Yritys on toiminut alalla yli 25 vuotta ja on yksi Varsinais-Suomen suurimmista riippumattomista lukkosepänliikkeistä. Palvelemme sekä yksityisasiakkaita että yrityksiä.
+
+
+PALVELUT
+
+1. Lukkojen sarjoitus ja vaihto
+Teemme kaikki lukkotyypit: sylinterilukot, mekaaniset koodilukot, sähköiset lukot. Sarjoitamme lukot niin, että yhdellä avaimella pääsee useampaan oveen.
+
+2. Avainpalvelu
+Valmistamme avaimia paikan päällä useimpiin lukkomerkkeihin. Myös autonavaimet ja kauko-ohjaimet.
+
+3. Hätäaukaisupalvelu
+Jos jäät lukkojen taakse, avustamme ovien avaamisessa ilman vahinkoa oveen tai lukkoon. Hätäpalvelu toimii ympäri vuorokauden.
+
+4. Turvalukitusjärjestelmät yrityksille
+Suunnittelemme ja asennamme kulunvalvonta- ja turvalukitusjärjestelmiä toimistoihin, varastoihin ja liiketiloihin. Sisältää mm. kulkukorttijärjestelmät ja sähköiset lukot.
+
+5. Kassakaappien myynti ja huolto
+Myymme ja huollamme kotitalouksien ja yritysten kassakaappeja. Myös vanhojen kassakaappien avaaminen, jos koodi on unohtunut.
+
+6. Vakuutusyhtiöiden hyväksymät lukitukset
+Asennamme vakuutusyhtiöiden vaatimusten mukaisia lisälukituksia, jotka voivat alentaa kotivakuutuksen omavastuuta murtotapauksissa.
+
+
+HINNASTO (alv 0%, suuntaa antava)
+
+Lukon sarjoitus, 1 lukko: alkaen 45€
+Lukon vaihto, perus sylinterilukko: alkaen 89€
+Avaimen valmistus (paikan päällä): 8-15€/avain
+Hätäaukaisu, arkisin klo 8-16: alkaen 90€
+Hätäaukaisu, ilta/yö/viikonloppu: alkaen 150€
+Turvalukitusjärjestelmän asennus yritykselle: hinta arvioidaan kohteen mukaan, ilmainen kartoituskäynti
+Kassakaapin avaus (koodi unohtunut): alkaen 120€
+
+Kaikkiin isompiin toimeksiantoihin annamme ilmaisen tarjouksen ennen työn aloitusta.
+
+
+AUKIOLOAJAT
+
+Myymälä ja toimisto:
+Maanantai-perjantai: 8:00-17:00
+Lauantai: 10:00-14:00
+Sunnuntai: suljettu
+
+Hätäpalvelu (lukkojen takana olo):
+Joka päivä 24 tuntia vuorokaudessa
+
+
+USEIN KYSYTYT KYSYMYKSET
+
+Kysymys: Kuinka nopeasti pääsette paikalle hätätilanteessa?
+Vastaus: Turun keskusta-alueella yleensä 20-40 minuutissa. Lähikunnissa (Kaarina, Raisio) noin 30-60 minuutissa, ajankohdasta riippuen.
+
+Kysymys: Voinko tilata avainten sarjoituksen ilman että tuon koko lukkoa mukana?
+Vastaus: Kyllä, useimmiten riittää, että tuot yhden toimivan avaimen mukanasi, niin teemme sen perusteella lisää avaimia.
+
+Kysymys: Teettekö töitä myös taloyhtiöille?
+Vastaus: Kyllä, teemme paljon yhteistyötä taloyhtiöiden kanssa, esimerkiksi koko kiinteistön lukitusjärjestelmän uusimisia ja huoltosopimuksia.
+
+Kysymys: Onko ilmainen tarjouskäynti oikeasti ilmainen?
+Vastaus: Kyllä, kartoituskäynti yritysasiakkaille turvalukitusjärjestelmien osalta on maksuton eikä sido mihinkään.
+
+Kysymys: Voiko lukon vaihtaa itse, jos ostan sen teiltä?
+Vastaus: Myymme lukkoja myös ilman asennusta, mutta suosittelemme ammattilaisen asennusta erityisesti turvalukkojen kohdalla oikean toiminnan varmistamiseksi.
+
+
+YHTEYSTIEDOT
+
+Puhelin (toimisto): 02 123 4567
+Puhelin (hätäpalvelu 24h): 040 123 4567
+Sähköposti: info@turunlukko.fi
+Osoite: Kauppiaskatu 12, 20100 Turku
+Y-tunnus: 1234567-8
