@@ -1,17 +1,30 @@
 (function () {
+  // ===== MUOKKAA NÄITÄ =====
+  const PAANVARI = '#2563eb';
+  const IKONI = '💬';
+  const RENDER_OSOITE = 'https://chatbot-projekti.onrender.com';
+  // ==========================
+
   const nappi = document.createElement('div');
-  nappi.innerHTML = '💬';
+  nappi.innerHTML = IKONI;
   nappi.style.cssText = `
     position: fixed; bottom: 20px; right: 20px;
     width: 60px; height: 60px; border-radius: 50%;
-    background: #2563eb; color: white; font-size: 28px;
+    background: ${PAANVARI}; color: white; font-size: 28px;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 999999;
+    z-index: 999999; transition: transform 0.2s;
   `;
 
+  nappi.addEventListener('mouseenter', () => {
+    nappi.style.transform = 'scale(1.08)';
+  });
+  nappi.addEventListener('mouseleave', () => {
+    nappi.style.transform = 'scale(1)';
+  });
+
   const ikkuna = document.createElement('iframe');
-  ikkuna.src = 'http://localhost:3000/widget-chat.html';
+  ikkuna.src = RENDER_OSOITE + '/widget-chat.html';
   ikkuna.style.cssText = `
     position: fixed; bottom: 90px; right: 20px;
     width: 350px; height: 450px; border: none;
