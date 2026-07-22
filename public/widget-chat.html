@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+  #chat { flex: 1; padding: 12px; overflow-y: auto; }
+  .viesti { margin-bottom: 10px; font-size: 14px; }
+  .kayttaja { font-weight: bold; color: #2563eb; }
+  .botti { font-weight: bold; color: #16a34a; }
+  #alaosa { display: flex; padding: 8px; border-top: 1px solid #eee; }
+  #syote { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+  #laheta { padding: 8px 16px; margin-left: 8px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div id="chat"></div>
+<div id="alaosa">
+  <input id="syote" type="text" placeholder="Kirjoita kysymys...">
+  <button id="laheta">Lähetä</button>
+</div>
+
+<script>
+const chat = document.getElementById('chat');
+const syote = document.getElementById('syote');
+const nappi = document.getElementById('laheta');
+
+function lisaaViesti(teksti, luokka) {
+  const div = document.createElement('div');
+  div.className = 'viesti';
+  div.innerHTML = `<span class="${luokka}">${luokka === 'kayttaja' ? 'Sinä' : 'Botti'}:</span> ${teksti}`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function lahetaKysymys() {
+  const kysymys = syote.value.trim();
+  if (!kysymys) return;
+  lisaaViesti(kysymys, 'kayttaja');
+  syote.value = '';
+
+  const vastaus = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kysymys })
+  });
+  const data = await vastaus.json();
+  lisaaViesti(data.vastaus, 'botti');
+}
+
+nappi.addEventListener('click', lahetaKysymys);
+syote.addEventListener('keypress', (e) => { if (e.key === 'Enter') lahetaKysymys(); });
+</script>
+</body>
+</html>

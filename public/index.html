@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<title>AI Chatbot</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 500px; margin: 40px auto; }
+  #chat { border: 1px solid #ccc; border-radius: 8px; padding: 16px; height: 400px; overflow-y: auto; margin-bottom: 12px; }
+  .viesti { margin-bottom: 10px; }
+  .kayttaja { font-weight: bold; color: #2563eb; }
+  .botti { font-weight: bold; color: #16a34a; }
+  #syote { width: 80%; padding: 8px; }
+  #laheta { padding: 8px 16px; }
+</style>
+</head>
+<body>
+<h2>Asiakaspalvelu-chatbot</h2>
+<div id="chat"></div>
+<input id="syote" type="text" placeholder="Kirjoita kysymys...">
+<button id="laheta">Lähetä</button>
+
+<script>
+const chat = document.getElementById('chat');
+const syote = document.getElementById('syote');
+const nappi = document.getElementById('laheta');
+
+function lisaaViesti(teksti, luokka) {
+  const div = document.createElement('div');
+  div.className = 'viesti';
+  div.innerHTML = `<span class="${luokka}">${luokka === 'kayttaja' ? 'Sinä' : 'Botti'}:</span> ${teksti}`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function lahetaKysymys() {
+  const kysymys = syote.value.trim();
+  if (!kysymys) return;
+  lisaaViesti(kysymys, 'kayttaja');
+  syote.value = '';
+
+  const vastaus = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kysymys })
+  });
+  const data = await vastaus.json();
+  lisaaViesti(data.vastaus, 'botti');
+}
+
+nappi.addEventListener('click', lahetaKysymys);
+syote.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') lahetaKysymys();
+});
+</script>
+</body>
+</html>
