@@ -10,14 +10,23 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 app.post('/api/chat', async (req, res) => {
   try {
     const kysymys = req.body.kysymys;
     const asiakas = req.body.asiakas || 'turun-lukko';
+
+    // Valitaan oikea API-avain asiakkaan mukaan
+    const avaimet = {
+      'turun-lukko': process.env.OPENAI_API_KEY_TURUN_LUKKO,
+      'auto-mauno': process.env.OPENAI_API_KEY_AUTO_MAUNO,
+    };
+    const apiAvain = avaimet[asiakas];
+
+    if (!apiAvain) {
+      return res.status(404).json({ virhe: 'API-avainta ei löydy asiakkaalle: ' + asiakas });
+    }
+
+    const openai = new OpenAI({ apiKey: apiAvain });
 
     const tiedostoPolku = path.join(__dirname, 'asiakkaat', `${asiakas}.txt`);
 

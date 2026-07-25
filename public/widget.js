@@ -26,7 +26,7 @@
   });
 
   const ikkuna = document.createElement('iframe');
-  ikkuna.src = RENDER_OSOITE + '/widget-chat.html';
+  ikkuna.src = RENDER_OSOITE + '/widget-chat.html?asiakas=' + encodeURIComponent(asiakas);
   ikkuna.style.cssText = `
     position: fixed; bottom: 90px; right: 20px;
     width: 350px; height: 450px; border: none;
