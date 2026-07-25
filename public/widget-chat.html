@@ -134,7 +134,7 @@ async function alusta() {
 
   try {
     const asetukset = await fetch('/api/asetukset/' + asiakas).then(r => r.json());
-    headerTeksti.textContent = 'Keskustele ' + asetukset.nimi + ' kanssa';
+    headerTeksti.textContent =asetukset.nimi;
     document.documentElement.style.setProperty('--paavari', asetukset.paavari);
 
     if (asetukset.logo) {
