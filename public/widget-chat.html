@@ -69,7 +69,7 @@
 </head>
 <body>
 
-<div id="header">Keskustele Turun lukon kanssa</div>
+<div id="header">Keskustele meidän kanssa</div>
 <div id="chat"></div>
 <div id="alaosa">
   <input id="syote" type="text" placeholder="Kirjoita viesti...">
@@ -80,6 +80,9 @@
 const chat = document.getElementById('chat');
 const syote = document.getElementById('syote');
 const nappi = document.getElementById('laheta');
+
+const urlParametrit = new URLSearchParams(window.location.search);
+const asiakas = urlParametrit.get('asiakas') || 'turun-lukko';
 
 function lisaaViesti(teksti, luokka) {
   const rivi = document.createElement('div');
@@ -101,7 +104,6 @@ function lisaaViesti(teksti, luokka) {
   chat.scrollTop = chat.scrollHeight;
 }
 
-// Tervehdysviesti heti kun chat avautuu
 lisaaViesti('Hei! Miten voin auttaa sinua tänään?', 'botti');
 
 async function lahetaKysymys() {
@@ -113,7 +115,7 @@ async function lahetaKysymys() {
   const vastaus = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ kysymys })
+    body: JSON.stringify({ kysymys, asiakas })
   });
   const data = await vastaus.json();
   lisaaViesti(data.vastaus, 'botti');

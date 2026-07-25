@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
+const path = require('path');
 const OpenAI = require('openai');
 
 const app = express();
@@ -13,11 +14,18 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const yritystiedot = fs.readFileSync('yritystiedot.txt', 'utf8');
-
 app.post('/api/chat', async (req, res) => {
   try {
     const kysymys = req.body.kysymys;
+    const asiakas = req.body.asiakas || 'turun-lukko';
+
+    const tiedostoPolku = path.join(__dirname, 'asiakkaat', `${asiakas}.txt`);
+
+    if (!fs.existsSync(tiedostoPolku)) {
+      return res.status(404).json({ virhe: 'Asiakasta ei löydy: ' + asiakas });
+    }
+
+    const yritystiedot = fs.readFileSync(tiedostoPolku, 'utf8');
 
     const vastaus = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -40,5 +48,5 @@ ${yritystiedot}`
   }
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Palvelin käynnissä: http://localhost:${PORT}`));
