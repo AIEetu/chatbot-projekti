@@ -47,6 +47,11 @@
 
     document.body.appendChild(nappi);
     document.body.appendChild(ikkuna);
+    window.addEventListener('message', (event) => {
+  if (event.data === 'sulje-chat') {
+    ikkuna.style.display = 'none';
+  }
+});
 
     nappi.addEventListener('click', () => {
       ikkuna.style.display = ikkuna.style.display === 'none' ? 'block' : 'none';

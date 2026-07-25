@@ -11,7 +11,8 @@
     background: white;
   }
 
- #header {
+  #header {
+    position: relative;
     background: var(--paavari);
     color: white;
     padding: 14px 16px;
@@ -27,6 +28,19 @@
     object-fit: cover;
     background: white;
   }
+  #sulje {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+  }
+  #sulje:hover { opacity: 0.7; }
 
   #chat {
     flex: 1; padding: 16px; overflow-y: auto;
@@ -77,6 +91,7 @@
 <div id="header">
   <img id="header-logo" src="" alt="" style="display:none;">
   <span id="header-teksti">Ladataan...</span>
+  <button id="sulje">✕</button>
 </div>
 <div id="chat"></div>
 <div id="alaosa">
@@ -152,6 +167,9 @@ async function lahetaKysymys() {
 
 nappi.addEventListener('click', lahetaKysymys);
 syote.addEventListener('keypress', (e) => { if (e.key === 'Enter') lahetaKysymys(); });
+document.getElementById('sulje').addEventListener('click', () => {
+  window.parent.postMessage('sulje-chat', '*');
+});
 </script>
 </body>
 </html>
