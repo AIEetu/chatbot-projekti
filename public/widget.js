@@ -1,5 +1,7 @@
 (function () {
   // ===== MUOKKAA NÄITÄ =====
+  const script = document.currentScript;
+  const asiakas = script.getAttribute('data-asiakas') || 'turun-lukko';
   const PAANVARI = '#2563eb';
   const IKONI = '💬';
   const RENDER_OSOITE = 'https://chatbot-projekti.onrender.com';
