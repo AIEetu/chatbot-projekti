@@ -11,13 +11,21 @@
     background: white;
   }
 
-  #header {
+ #header {
     background: var(--paavari);
     color: white;
-    padding: 20px 16px 16px;
-    text-align: center;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-weight: 600;
     font-size: 16px;
+  }
+  #header img {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: white;
   }
 
   #chat {
@@ -66,7 +74,10 @@
 </head>
 <body>
 
-<div id="header">Ladataan...</div>
+<div id="header">
+  <img id="header-logo" src="" alt="" style="display:none;">
+  <span id="header-teksti">Ladataan...</span>
+</div>
 <div id="chat"></div>
 <div id="alaosa">
   <input id="syote" type="text" placeholder="Kirjoita viesti...">
@@ -77,7 +88,7 @@
 const chat = document.getElementById('chat');
 const syote = document.getElementById('syote');
 const nappi = document.getElementById('laheta');
-const header = document.getElementById('header');
+
 
 const urlParametrit = new URLSearchParams(window.location.search);
 const asiakas = urlParametrit.get('asiakas') || 'turun-lukko';
@@ -103,13 +114,22 @@ function lisaaViesti(teksti, luokka) {
 }
 
 async function alusta() {
+  const headerLogo = document.getElementById('header-logo');
+  const headerTeksti = document.getElementById('header-teksti');
+
   try {
     const asetukset = await fetch('/api/asetukset/' + asiakas).then(r => r.json());
-    header.textContent = 'Keskustele ' + asetukset.nimi + ' kanssa';
+    headerTeksti.textContent = 'Keskustele ' + asetukset.nimi + ' kanssa';
     document.documentElement.style.setProperty('--paavari', asetukset.paavari);
+
+    if (asetukset.logo) {
+      headerLogo.src = asetukset.logo;
+      headerLogo.style.display = 'block';
+    }
+
     lisaaViesti(asetukset.tervehdys, 'botti');
   } catch (virhe) {
-    header.textContent = 'Chat';
+    headerTeksti.textContent = 'Chat';
     lisaaViesti('Hei! Miten voin auttaa?', 'botti');
   }
 }
