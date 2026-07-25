@@ -182,15 +182,17 @@ async function lahetaKysymys() {
 
 nappi.addEventListener('click', lahetaKysymys);
 syote.addEventListener('keypress', (e) => { if (e.key === 'Enter') lahetaKysymys(); });
+
 document.getElementById('sulje').addEventListener('click', () => {
   window.parent.postMessage('sulje-chat', '*');
-  document.getElementById('tyhjenna').addEventListener('click', () => {
+});
+
+document.getElementById('tyhjenna').addEventListener('click', () => {
   chat.innerHTML = '';
   fetch('/api/asetukset/' + asiakas)
     .then(r => r.json())
     .then(asetukset => lisaaViesti(asetukset.tervehdys, 'botti'))
     .catch(() => lisaaViesti('Hei! Miten voin auttaa?', 'botti'));
-});
 });
 </script>
 </body>
