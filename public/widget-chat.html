@@ -42,6 +42,20 @@
   }
   #sulje:hover { opacity: 0.7; }
 
+  #tyhjenna {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+  }
+  #tyhjenna:hover { opacity: 0.7; }
+
   #chat {
     flex: 1; padding: 16px; overflow-y: auto;
     display: flex; flex-direction: column; gap: 10px;
@@ -89,6 +103,7 @@
 <body>
 
 <div id="header">
+  <button id="tyhjenna" title="Aloita uusi keskustelu">↺</button>
   <img id="header-logo" src="" alt="" style="display:none;">
   <span id="header-teksti">Ladataan...</span>
   <button id="sulje">✕</button>
@@ -169,6 +184,13 @@ nappi.addEventListener('click', lahetaKysymys);
 syote.addEventListener('keypress', (e) => { if (e.key === 'Enter') lahetaKysymys(); });
 document.getElementById('sulje').addEventListener('click', () => {
   window.parent.postMessage('sulje-chat', '*');
+  document.getElementById('tyhjenna').addEventListener('click', () => {
+  chat.innerHTML = '';
+  fetch('/api/asetukset/' + asiakas)
+    .then(r => r.json())
+    .then(asetukset => lisaaViesti(asetukset.tervehdys, 'botti'))
+    .catch(() => lisaaViesti('Hei! Miten voin auttaa?', 'botti'));
+});
 });
 </script>
 </body>
