@@ -100,13 +100,14 @@
   .pikanappi:hover {
     background: var(--paavari);
     color: white;
-    #lomake {
-    padding: 12px 16px;
-    display: flex; flex-direction: column; gap: 8px;
   }
+
   #lomake {
     padding: 16px;
     display: flex; flex-direction: column; gap: 14px;
+    background: #fafafa;
+    border-radius: 12px;
+    margin: 0 16px 12px;
   }
   .lomake-kentta {
     display: flex; flex-direction: column; gap: 6px;
@@ -127,6 +128,11 @@
     font-size: 14px;
     font-family: inherit;
     resize: none;
+    background: white;
+  }
+  #lomake input::placeholder,
+  #lomake textarea::placeholder {
+    color: #9ca3af;
   }
   #lomake input:focus,
   #lomake textarea:focus { border-color: var(--paavari); outline: none; }
@@ -140,7 +146,6 @@
     font-weight: 600;
     cursor: pointer;
     margin-top: 4px;
-  }
   }
 
   #alaosa {
@@ -219,7 +224,7 @@ function naytaPikavalinnat(vaihtoehdot) {
       } else if (valinta.lomake) {
         naytaLomake(valinta.teksti);
       } else {
-        lahetaValmisKysymys(valinta.kysymys, valinta.teksti);
+        lahetaValmisKysymys(valinta.kysymys, valinta.teksti, true);
       }
     });
     kontti.appendChild(nap);
@@ -228,6 +233,7 @@ function naytaPikavalinnat(vaihtoehdot) {
   chat.appendChild(kontti);
   chat.scrollTop = chat.scrollHeight;
 }
+
 function naytaLomake(palvelu) {
   const kontti = document.createElement('div');
   kontti.id = 'lomake';
@@ -294,21 +300,31 @@ function naytaLomake(palvelu) {
   });
 }
 
-async function lahetaValmisKysymys(teksti) {
-  lisaaViesti(teksti, 'kayttaja');
+async function naytaPikavalinnatUudelleen() {
+  try {
+    const asetukset = await fetch('/api/asetukset/' + asiakas).then(r => r.json());
+    if (asetukset.vainPikavalinnat && asetukset.pikavalinnat) {
+      naytaPikavalinnat(asetukset.pikavalinnat);
+    }
+  } catch (virhe) {
+    console.error('Asetusten haku epäonnistui', virhe);
+  }
+}
+
+async function lahetaValmisKysymys(kysymys, naytettavaTeksti, viestiJoNaytetty) {
+  if (!viestiJoNaytetty) {
+    lisaaViesti(naytettavaTeksti || kysymys, 'kayttaja');
+  }
 
   const vastaus = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ kysymys: teksti, asiakas })
+    body: JSON.stringify({ kysymys, asiakas })
   });
   const data = await vastaus.json();
   lisaaViesti(data.vastaus, 'botti');
 
-  const asetukset = await fetch('/api/asetukset/' + asiakas).then(r => r.json());
-  if (asetukset.vainPikavalinnat && asetukset.pikavalinnat) {
-    naytaPikavalinnat(asetukset.pikavalinnat);
-  }
+  naytaPikavalinnatUudelleen();
 }
 
 async function alusta() {
