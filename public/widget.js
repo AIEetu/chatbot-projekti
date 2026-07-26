@@ -34,6 +34,19 @@
       nappi.style.color = 'white';
     }
 
+    const onlinePallo = document.createElement('div');
+    onlinePallo.style.cssText = `
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 16px;
+      height: 16px;
+      background: #22c55e;
+      border: 2px solid white;
+      border-radius: 50%;
+    `;
+    nappi.appendChild(onlinePallo);
+
     nappi.addEventListener('mouseenter', () => { nappi.style.transform = 'scale(1.08)'; });
     nappi.addEventListener('mouseleave', () => { nappi.style.transform = 'scale(1)'; });
 
@@ -48,11 +61,12 @@
 
     document.body.appendChild(nappi);
     document.body.appendChild(ikkuna);
+
     window.addEventListener('message', (event) => {
-  if (event.data === 'sulje-chat') {
-    ikkuna.style.display = 'none';
-  }
-});
+      if (event.data === 'sulje-chat') {
+        ikkuna.style.display = 'none';
+      }
+    });
 
     nappi.addEventListener('click', () => {
       ikkuna.style.display = ikkuna.style.display === 'none' ? 'block' : 'none';
