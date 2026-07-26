@@ -3,5 +3,11 @@
   "tervehdys": "Hei! Olen Turun Lukon avustaja. Miten voin auttaa lukitusasioissa?",
   "persoona": "Olet ammattimainen ja luotettava asiakaspalvelija lukkosepänliikkeessä. Puhut asiallisesti mutta ystävällisesti.",
   "paavari": "#2563eb",
-  "logo": "/logot/turun-lukko.png"
+  "logo": "/logot/turun-lukko.png",
+  "pikavalinnat": [
+    "Varaa aika huollolle",
+    "Haluan tarjouksen",
+    "Lisätietoa palveluista",
+    "Muut asiat"
+  ]
 }

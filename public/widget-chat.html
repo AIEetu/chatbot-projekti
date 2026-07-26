@@ -83,6 +83,25 @@
     background: #f1f3f5; color: #1f2937; border-bottom-left-radius: 4px;
   }
 
+  #pikavalinnat {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    padding: 0 16px 12px;
+  }
+  .pikanappi {
+    background: white;
+    border: 1px solid var(--paavari);
+    color: var(--paavari);
+    padding: 8px 14px;
+    border-radius: 16px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .pikanappi:hover {
+    background: var(--paavari);
+    color: white;
+  }
+
   #alaosa {
     display: flex; align-items: center;
     padding: 12px; border-top: 1px solid #eee; gap: 8px;
@@ -119,7 +138,6 @@ const chat = document.getElementById('chat');
 const syote = document.getElementById('syote');
 const nappi = document.getElementById('laheta');
 
-
 const urlParametrit = new URLSearchParams(window.location.search);
 const asiakas = urlParametrit.get('asiakas') || 'turun-lukko';
 
@@ -143,13 +161,44 @@ function lisaaViesti(teksti, luokka) {
   chat.scrollTop = chat.scrollHeight;
 }
 
+function naytaPikavalinnat(vaihtoehdot) {
+  const kontti = document.createElement('div');
+  kontti.id = 'pikavalinnat';
+
+  vaihtoehdot.forEach(teksti => {
+    const nap = document.createElement('button');
+    nap.className = 'pikanappi';
+    nap.textContent = teksti;
+    nap.addEventListener('click', () => {
+      kontti.remove();
+      lahetaValmisKysymys(teksti);
+    });
+    kontti.appendChild(nap);
+  });
+
+  chat.appendChild(kontti);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function lahetaValmisKysymys(teksti) {
+  lisaaViesti(teksti, 'kayttaja');
+
+  const vastaus = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kysymys: teksti, asiakas })
+  });
+  const data = await vastaus.json();
+  lisaaViesti(data.vastaus, 'botti');
+}
+
 async function alusta() {
   const headerLogo = document.getElementById('header-logo');
   const headerTeksti = document.getElementById('header-teksti');
 
   try {
     const asetukset = await fetch('/api/asetukset/' + asiakas).then(r => r.json());
-    headerTeksti.textContent =asetukset.nimi;
+    headerTeksti.textContent = asetukset.nimi;
     document.documentElement.style.setProperty('--paavari', asetukset.paavari);
 
     if (asetukset.logo) {
@@ -158,6 +207,10 @@ async function alusta() {
     }
 
     lisaaViesti(asetukset.tervehdys, 'botti');
+
+    if (asetukset.pikavalinnat && asetukset.pikavalinnat.length > 0) {
+      naytaPikavalinnat(asetukset.pikavalinnat);
+    }
   } catch (virhe) {
     headerTeksti.textContent = 'Chat';
     lisaaViesti('Hei! Miten voin auttaa?', 'botti');
@@ -191,7 +244,12 @@ document.getElementById('tyhjenna').addEventListener('click', () => {
   chat.innerHTML = '';
   fetch('/api/asetukset/' + asiakas)
     .then(r => r.json())
-    .then(asetukset => lisaaViesti(asetukset.tervehdys, 'botti'))
+    .then(asetukset => {
+      lisaaViesti(asetukset.tervehdys, 'botti');
+      if (asetukset.pikavalinnat && asetukset.pikavalinnat.length > 0) {
+        naytaPikavalinnat(asetukset.pikavalinnat);
+      }
+    })
     .catch(() => lisaaViesti('Hei! Miten voin auttaa?', 'botti'));
 });
 </script>
