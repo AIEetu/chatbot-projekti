@@ -44,7 +44,6 @@
       width: 350px; height: 450px; border: none;
       border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);
       display: none; z-index: 999999; background: white;
-      border: 1px solid black;
     `;
 
     document.body.appendChild(nappi);
