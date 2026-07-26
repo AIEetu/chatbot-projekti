@@ -7,12 +7,12 @@
   "vainPikavalinnat": true,
   "pikavalinnat": [
     {
-  "teksti": "Varaa aika huollolle",
-  "alavalinnat": [
-    { "teksti": "Lukkojen sarjoitus tai vaihto", "varaus": true },
-    { "teksti": "Hätäaukaisu (ei kiireellinen)", "varaus": true }
-  ]
-},
+      "teksti": "Varaa aika huollolle",
+      "alavalinnat": [
+        { "teksti": "Lukkojen sarjoitus tai vaihto", "varaus": true },
+        { "teksti": "Hätäaukaisu (ei kiireellinen)", "varaus": true }
+      ]
+    },
     {
       "teksti": "Haluan tarjouksen",
       "alavalinnat": [
@@ -21,7 +21,7 @@
         { "teksti": "Kassakaapin avaus", "lomake": true }
       ]
     },
-   { "teksti": "Lisätietoa palveluista", "kysymys": "Kerro lisätietoa palveluistanne", "eiUudelleenNaytolla": true },,
+    { "teksti": "Lisätietoa palveluista", "kysymys": "Kerro lisätietoa palveluistanne", "eiUudelleenNaytolla": true },
     { "teksti": "Muut asiat", "kysymys": "Minulla on jokin muu kysymys" }
   ]
 }
