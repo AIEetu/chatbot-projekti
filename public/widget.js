@@ -45,8 +45,8 @@
       position: absolute;
       top: -2px;
       right: 0px;
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       background: #22c55e;
       border-radius: 50%;
     `;
