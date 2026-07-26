@@ -4,6 +4,7 @@
   "persoona": "Olet ammattimainen ja luotettava asiakaspalvelija lukkosepänliikkeessä. Puhut asiallisesti mutta ystävällisesti.",
   "paavari": "#2563eb",
   "logo": "/logot/turun-lukko.png",
+  "vainPikavalinnat": true,
   "pikavalinnat": [
     "Varaa aika huollolle",
     "Haluan tarjouksen",

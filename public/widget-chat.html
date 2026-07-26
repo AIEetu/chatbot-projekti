@@ -190,6 +190,11 @@ async function lahetaValmisKysymys(teksti) {
   });
   const data = await vastaus.json();
   lisaaViesti(data.vastaus, 'botti');
+
+  const asetukset = await fetch('/api/asetukset/' + asiakas).then(r => r.json());
+  if (asetukset.vainPikavalinnat && asetukset.pikavalinnat) {
+    naytaPikavalinnat(asetukset.pikavalinnat);
+  }
 }
 
 async function alusta() {
@@ -207,6 +212,10 @@ async function alusta() {
     }
 
     lisaaViesti(asetukset.tervehdys, 'botti');
+
+    if (asetukset.vainPikavalinnat) {
+      document.getElementById('alaosa').style.display = 'none';
+    }
 
     if (asetukset.pikavalinnat && asetukset.pikavalinnat.length > 0) {
       naytaPikavalinnat(asetukset.pikavalinnat);
@@ -246,6 +255,9 @@ document.getElementById('tyhjenna').addEventListener('click', () => {
     .then(r => r.json())
     .then(asetukset => {
       lisaaViesti(asetukset.tervehdys, 'botti');
+      if (asetukset.vainPikavalinnat) {
+        document.getElementById('alaosa').style.display = 'none';
+      }
       if (asetukset.pikavalinnat && asetukset.pikavalinnat.length > 0) {
         naytaPikavalinnat(asetukset.pikavalinnat);
       }
