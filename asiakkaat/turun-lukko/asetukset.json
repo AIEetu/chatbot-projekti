@@ -21,7 +21,7 @@
         { "teksti": "Kassakaapin avaus", "lomake": true }
       ]
     },
-    { "teksti": "Lisätietoa palveluista", "kysymys": "Kerro lisätietoa palveluistanne" },
+   { "teksti": "Lisätietoa palveluista", "kysymys": "Kerro lisätietoa palveluistanne", "eiUudelleenNaytolla": true },,
     { "teksti": "Muut asiat", "kysymys": "Minulla on jokin muu kysymys" }
   ]
 }
