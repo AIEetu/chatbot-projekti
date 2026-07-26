@@ -1,3 +1,6 @@
+
+
+Widget chat · HTML
 <!DOCTYPE html>
 <html lang="fi">
 <head>
@@ -10,7 +13,7 @@
     margin: 0; display: flex; flex-direction: column; height: 100vh;
     background: white;
   }
-
+ 
   #header {
     position: relative;
     background: var(--paavari);
@@ -41,7 +44,7 @@
     padding: 4px 8px;
   }
   #sulje:hover { opacity: 0.7; }
-
+ 
   #tyhjenna {
     position: absolute;
     top: 12px;
@@ -55,23 +58,23 @@
     padding: 4px 8px;
   }
   #tyhjenna:hover { opacity: 0.7; }
-
+ 
   #chat {
     flex: 1; padding: 16px; overflow-y: auto;
     display: flex; flex-direction: column; gap: 10px;
     background: white;
   }
-
+ 
   .rivi { display: flex; align-items: flex-end; gap: 8px; }
   .rivi.kayttaja { justify-content: flex-end; }
-
+ 
   .avatar {
     width: 28px; height: 28px; border-radius: 50%;
     background: var(--paavari); color: white;
     display: flex; align-items: center; justify-content: center;
     font-size: 14px; flex-shrink: 0;
   }
-
+ 
   .kupla {
     max-width: 75%; padding: 10px 14px; border-radius: 16px;
     font-size: 14px; line-height: 1.4;
@@ -82,7 +85,7 @@
   .botti .kupla {
     background: #f1f3f5; color: #1f2937; border-bottom-left-radius: 4px;
   }
-
+ 
   #pikavalinnat {
     display: flex; flex-wrap: wrap; gap: 8px;
     padding: 0 16px 12px;
@@ -101,8 +104,8 @@
     background: var(--paavari);
     color: white;
   }
-
-  #lomake {
+ 
+  #lomake, #kalenteri {
     padding: 16px;
     display: flex; flex-direction: column; gap: 14px;
     background: #fafafa;
@@ -121,7 +124,9 @@
     color: var(--paavari);
   }
   #lomake input,
-  #lomake textarea {
+  #lomake textarea,
+  #kalenteri input,
+  #kalenteri select {
     padding: 12px 14px;
     border: 1px solid #ddd;
     border-radius: 10px;
@@ -135,8 +140,11 @@
     color: #9ca3af;
   }
   #lomake input:focus,
-  #lomake textarea:focus { border-color: var(--paavari); outline: none; }
-  #lomake button {
+  #lomake textarea:focus,
+  #kalenteri input:focus,
+  #kalenteri select:focus { border-color: var(--paavari); outline: none; }
+  #lomake button,
+  #kalenteri button {
     background: var(--paavari);
     color: white;
     border: none;
@@ -147,7 +155,7 @@
     cursor: pointer;
     margin-top: 4px;
   }
-
+ 
   #alaosa {
     display: flex; align-items: center;
     padding: 12px; border-top: 1px solid #eee; gap: 8px;
@@ -166,7 +174,7 @@
 </style>
 </head>
 <body>
-
+ 
 <div id="header">
   <button id="tyhjenna" title="Aloita uusi keskustelu">↺</button>
   <img id="header-logo" src="" alt="" style="display:none;">
@@ -178,39 +186,39 @@
   <input id="syote" type="text" placeholder="Kirjoita viesti...">
   <button id="laheta">➤</button>
 </div>
-
+ 
 <script>
 const chat = document.getElementById('chat');
 const syote = document.getElementById('syote');
 const nappi = document.getElementById('laheta');
-
+ 
 const urlParametrit = new URLSearchParams(window.location.search);
 const asiakas = urlParametrit.get('asiakas') || 'turun-lukko';
-
+ 
 function lisaaViesti(teksti, luokka) {
   const rivi = document.createElement('div');
   rivi.className = 'rivi ' + luokka;
-
+ 
   if (luokka === 'botti') {
     const avatar = document.createElement('div');
     avatar.className = 'avatar';
     avatar.textContent = '🤖';
     rivi.appendChild(avatar);
   }
-
+ 
   const kupla = document.createElement('div');
   kupla.className = 'kupla';
   kupla.textContent = teksti;
   rivi.appendChild(kupla);
-
+ 
   chat.appendChild(rivi);
   chat.scrollTop = chat.scrollHeight;
 }
-
+ 
 function naytaPikavalinnat(vaihtoehdot) {
   const kontti = document.createElement('div');
   kontti.id = 'pikavalinnat';
-
+ 
   vaihtoehdot.forEach(valinta => {
     const nap = document.createElement('button');
     nap.className = 'pikanappi';
@@ -218,9 +226,11 @@ function naytaPikavalinnat(vaihtoehdot) {
     nap.addEventListener('click', () => {
       kontti.remove();
       lisaaViesti(valinta.teksti, 'kayttaja');
-
+ 
       if (valinta.alavalinnat) {
         naytaPikavalinnat(valinta.alavalinnat);
+      } else if (valinta.varaus) {
+        naytaKalenteri(valinta.teksti);
       } else if (valinta.lomake) {
         naytaLomake(valinta.teksti);
       } else {
@@ -229,15 +239,61 @@ function naytaPikavalinnat(vaihtoehdot) {
     });
     kontti.appendChild(nap);
   });
-
+ 
   chat.appendChild(kontti);
   chat.scrollTop = chat.scrollHeight;
 }
-
-function naytaLomake(palvelu) {
+ 
+function naytaKalenteri(palvelu) {
+  const kontti = document.createElement('div');
+  kontti.id = 'kalenteri';
+ 
+  const tanaan = new Date().toISOString().split('T')[0];
+ 
+  kontti.innerHTML = `
+    <div class="lomake-kentta">
+      <label>Valitse päivä <span class="pakollinen">*</span></label>
+      <input type="date" id="kalenteri-paiva" min="${tanaan}">
+    </div>
+    <div class="lomake-kentta">
+      <label>Valitse kellonaika <span class="pakollinen">*</span></label>
+      <select id="kalenteri-aika">
+        <option value="">Valitse aika</option>
+        <option value="08:00">08:00</option>
+        <option value="09:00">09:00</option>
+        <option value="10:00">10:00</option>
+        <option value="11:00">11:00</option>
+        <option value="12:00">12:00</option>
+        <option value="13:00">13:00</option>
+        <option value="14:00">14:00</option>
+        <option value="15:00">15:00</option>
+        <option value="16:00">16:00</option>
+      </select>
+    </div>
+    <button id="kalenteri-jatka">Jatka</button>
+  `;
+ 
+  chat.appendChild(kontti);
+  chat.scrollTop = chat.scrollHeight;
+ 
+  document.getElementById('kalenteri-jatka').addEventListener('click', () => {
+    const paiva = document.getElementById('kalenteri-paiva').value;
+    const aika = document.getElementById('kalenteri-aika').value;
+ 
+    if (!paiva || !aika) {
+      alert('Valitse sekä päivä että kellonaika.');
+      return;
+    }
+ 
+    kontti.remove();
+    naytaLomake(palvelu, paiva, aika);
+  });
+}
+ 
+function naytaLomake(palvelu, paiva, aika) {
   const kontti = document.createElement('div');
   kontti.id = 'lomake';
-
+ 
   kontti.innerHTML = `
     <div class="lomake-kentta">
       <label>Nimi <span class="pakollinen">*</span></label>
@@ -263,12 +319,12 @@ function naytaLomake(palvelu) {
       <label>Viesti</label>
       <textarea id="lomake-viesti" placeholder="Viesti" rows="3"></textarea>
     </div>
-    <button id="lomake-laheta">Lähetä tarjouspyyntö</button>
+    <button id="lomake-laheta">${paiva ? 'Vahvista varaus' : 'Lähetä tarjouspyyntö'}</button>
   `;
-
+ 
   chat.appendChild(kontti);
   chat.scrollTop = chat.scrollHeight;
-
+ 
   document.getElementById('lomake-laheta').addEventListener('click', async () => {
     const nimi = document.getElementById('lomake-nimi').value.trim();
     const puhelin = document.getElementById('lomake-puhelin').value.trim();
@@ -276,28 +332,32 @@ function naytaLomake(palvelu) {
     const osoite = document.getElementById('lomake-osoite').value.trim();
     const postinumero = document.getElementById('lomake-postinumero').value.trim();
     const viesti = document.getElementById('lomake-viesti').value.trim();
-
+ 
     if (!nimi || !puhelin || !sahkoposti || !postinumero) {
       alert('Täytä kaikki pakolliset kentät (*).');
       return;
     }
-
+ 
     kontti.remove();
-
+ 
     try {
       await fetch('/api/tarjous', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ asiakas, palvelu, nimi, puhelin, sahkoposti, osoite, postinumero, viesti })
+        body: JSON.stringify({ asiakas, palvelu, nimi, puhelin, sahkoposti, osoite, postinumero, viesti, paiva: paiva || '', aika: aika || '' })
       });
     } catch (virhe) {
-      console.error('Tarjouspyynnön tallennus epäonnistui', virhe);
+      console.error('Tallennus epäonnistui', virhe);
     }
-
-    lisaaViesti('Kiitos! Olemme sinuun yhteydessä pian tarjouksen kanssa.', 'botti');
+ 
+    if (paiva && aika) {
+      lisaaViesti(`Kiitos! Varauksesi ${paiva} klo ${aika} on vastaanotettu, vahvistamme sen pian.`, 'botti');
+    } else {
+      lisaaViesti('Kiitos! Olemme sinuun yhteydessä pian tarjouksen kanssa.', 'botti');
+    }
   });
 }
-
+ 
 async function naytaPikavalinnatUudelleen() {
   try {
     const asetukset = await fetch('/api/asetukset/' + asiakas).then(r => r.json());
@@ -308,12 +368,12 @@ async function naytaPikavalinnatUudelleen() {
     console.error('Asetusten haku epäonnistui', virhe);
   }
 }
-
+ 
 async function lahetaValmisKysymys(kysymys, naytettavaTeksti, viestiJoNaytetty) {
   if (!viestiJoNaytetty) {
     lisaaViesti(naytettavaTeksti || kysymys, 'kayttaja');
   }
-
+ 
   const vastaus = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -321,30 +381,30 @@ async function lahetaValmisKysymys(kysymys, naytettavaTeksti, viestiJoNaytetty) 
   });
   const data = await vastaus.json();
   lisaaViesti(data.vastaus, 'botti');
-
+ 
   naytaPikavalinnatUudelleen();
 }
-
+ 
 async function alusta() {
   const headerLogo = document.getElementById('header-logo');
   const headerTeksti = document.getElementById('header-teksti');
-
+ 
   try {
     const asetukset = await fetch('/api/asetukset/' + asiakas).then(r => r.json());
     headerTeksti.textContent = asetukset.nimi;
     document.documentElement.style.setProperty('--paavari', asetukset.paavari);
-
+ 
     if (asetukset.logo) {
       headerLogo.src = asetukset.logo;
       headerLogo.style.display = 'block';
     }
-
+ 
     lisaaViesti(asetukset.tervehdys, 'botti');
-
+ 
     if (asetukset.vainPikavalinnat) {
       document.getElementById('alaosa').style.display = 'none';
     }
-
+ 
     if (asetukset.pikavalinnat && asetukset.pikavalinnat.length > 0) {
       naytaPikavalinnat(asetukset.pikavalinnat);
     }
@@ -354,13 +414,13 @@ async function alusta() {
   }
 }
 alusta();
-
+ 
 async function lahetaKysymys() {
   const kysymys = syote.value.trim();
   if (!kysymys) return;
   lisaaViesti(kysymys, 'kayttaja');
   syote.value = '';
-
+ 
   const vastaus = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -369,14 +429,14 @@ async function lahetaKysymys() {
   const data = await vastaus.json();
   lisaaViesti(data.vastaus, 'botti');
 }
-
+ 
 nappi.addEventListener('click', lahetaKysymys);
 syote.addEventListener('keypress', (e) => { if (e.key === 'Enter') lahetaKysymys(); });
-
+ 
 document.getElementById('sulje').addEventListener('click', () => {
   window.parent.postMessage('sulje-chat', '*');
 });
-
+ 
 document.getElementById('tyhjenna').addEventListener('click', () => {
   chat.innerHTML = '';
   fetch('/api/asetukset/' + asiakas)
@@ -395,3 +455,4 @@ document.getElementById('tyhjenna').addEventListener('click', () => {
 </script>
 </body>
 </html>
+ 

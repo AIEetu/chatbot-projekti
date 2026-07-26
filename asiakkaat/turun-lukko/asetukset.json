@@ -6,7 +6,13 @@
   "logo": "/logot/turun-lukko.png",
   "vainPikavalinnat": true,
   "pikavalinnat": [
-    { "teksti": "Varaa aika huollolle", "kysymys": "Haluan varata ajan huollolle" },
+    {
+  "teksti": "Varaa aika huollolle",
+  "alavalinnat": [
+    { "teksti": "Lukkojen sarjoitus tai vaihto", "varaus": true },
+    { "teksti": "Hätäaukaisu (ei kiireellinen)", "varaus": true }
+  ]
+},
     {
       "teksti": "Haluan tarjouksen",
       "alavalinnat": [
