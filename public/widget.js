@@ -42,7 +42,6 @@
       width: 16px;
       height: 16px;
       background: #22c55e;
-      border: 2px solid white;
       border-radius: 50%;
     `;
     nappi.appendChild(onlinePallo);
