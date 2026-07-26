@@ -231,8 +231,8 @@ function naytaPikavalinnat(vaihtoehdot) {
       } else if (valinta.lomake) {
         naytaLomake(valinta.teksti);
       } else {
-        const eiUudelleen = valinta.eiUudelleenNaytolla === true;
-        lahetaValmisKysymys(valinta.kysymys, valinta.teksti, true, eiUudelleen);
+        const piilotaToistona = valinta.piilotaToistona === true;
+        lahetaValmisKysymys(valinta.kysymys, valinta.teksti, true, piilotaToistona ? valinta.teksti : null);
       }
     });
     kontti.appendChild(nap);
@@ -356,18 +356,21 @@ function naytaLomake(palvelu, paiva, aika) {
   });
 }
  
-async function naytaPikavalinnatUudelleen() {
+async function naytaPikavalinnatUudelleen(poissuljettava) {
   try {
     const asetukset = await fetch('/api/asetukset/' + asiakas).then(r => r.json());
     if (asetukset.vainPikavalinnat && asetukset.pikavalinnat) {
-      naytaPikavalinnat(asetukset.pikavalinnat);
+      const lista = poissuljettava
+        ? asetukset.pikavalinnat.filter(v => v.teksti !== poissuljettava)
+        : asetukset.pikavalinnat;
+      naytaPikavalinnat(lista);
     }
   } catch (virhe) {
     console.error('Asetusten haku epäonnistui', virhe);
   }
 }
  
-async function lahetaValmisKysymys(kysymys, naytettavaTeksti, viestiJoNaytetty, eiUudelleenNaytolla) {
+async function lahetaValmisKysymys(kysymys, naytettavaTeksti, viestiJoNaytetty, poissuljettava) {
   if (!viestiJoNaytetty) {
     lisaaViesti(naytettavaTeksti || kysymys, 'kayttaja');
   }
@@ -380,9 +383,7 @@ async function lahetaValmisKysymys(kysymys, naytettavaTeksti, viestiJoNaytetty, 
   const data = await vastaus.json();
   lisaaViesti(data.vastaus, 'botti');
  
-  if (!eiUudelleenNaytolla) {
-    naytaPikavalinnatUudelleen();
-  }
+  naytaPikavalinnatUudelleen(poissuljettava);
 }
  
 async function alusta() {
