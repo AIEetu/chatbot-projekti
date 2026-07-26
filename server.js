@@ -35,17 +35,17 @@ app.get('/api/asetukset/:asiakas', (req, res) => {
 // Reitti: tallentaa tarjouspyynnön Google Sheetsiin
 app.post('/api/tarjous', async (req, res) => {
   try {
-    const { asiakas, palvelu, nimi, puhelin, sahkoposti } = req.body;
+    const { asiakas, palvelu, nimi, puhelin, sahkoposti, osoite, postinumero, viesti } = req.body;
 
     const sheetsUrl = sheetsOsoitteet[asiakas];
     if (!sheetsUrl) {
       return res.status(404).json({ virhe: 'Lomaketta ei ole määritelty tälle asiakkaalle' });
     }
 
-    await fetch(sheetsUrl, {
+   await fetch(sheetsUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ palvelu, nimi, puhelin, sahkoposti }),
+      body: JSON.stringify({ palvelu, nimi, puhelin, sahkoposti, osoite, postinumero, viesti }),
     });
 
     res.json({ status: 'ok' });

@@ -104,20 +104,40 @@
     padding: 12px 16px;
     display: flex; flex-direction: column; gap: 8px;
   }
-  #lomake input {
-    padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 14px;
+  #lomake {
+    padding: 16px;
+    display: flex; flex-direction: column; gap: 14px;
   }
-  #lomake input:focus { border-color: var(--paavari); outline: none; }
+  .lomake-kentta {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .lomake-kentta label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  .lomake-kentta label .pakollinen {
+    color: var(--paavari);
+  }
+  #lomake input,
+  #lomake textarea {
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: none;
+  }
+  #lomake input:focus,
+  #lomake textarea:focus { border-color: var(--paavari); outline: none; }
   #lomake button {
     background: var(--paavari);
     color: white;
     border: none;
-    padding: 10px;
-    border-radius: 8px;
+    padding: 12px;
+    border-radius: 10px;
     font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
     margin-top: 4px;
   }
@@ -213,9 +233,30 @@ function naytaLomake(palvelu) {
   kontti.id = 'lomake';
 
   kontti.innerHTML = `
-    <input type="text" id="lomake-nimi" placeholder="Nimi">
-    <input type="tel" id="lomake-puhelin" placeholder="Puhelinnumero">
-    <input type="email" id="lomake-sahkoposti" placeholder="Sähköposti">
+    <div class="lomake-kentta">
+      <label>Nimi <span class="pakollinen">*</span></label>
+      <input type="text" id="lomake-nimi" placeholder="Nimi">
+    </div>
+    <div class="lomake-kentta">
+      <label>Puhelinnumero <span class="pakollinen">*</span></label>
+      <input type="tel" id="lomake-puhelin" placeholder="Puhelinnumero">
+    </div>
+    <div class="lomake-kentta">
+      <label>Sähköposti <span class="pakollinen">*</span></label>
+      <input type="email" id="lomake-sahkoposti" placeholder="Sähköposti">
+    </div>
+    <div class="lomake-kentta">
+      <label>Osoite</label>
+      <input type="text" id="lomake-osoite" placeholder="Osoite">
+    </div>
+    <div class="lomake-kentta">
+      <label>Postinumero <span class="pakollinen">*</span></label>
+      <input type="text" id="lomake-postinumero" placeholder="Postinumero">
+    </div>
+    <div class="lomake-kentta">
+      <label>Viesti</label>
+      <textarea id="lomake-viesti" placeholder="Viesti" rows="3"></textarea>
+    </div>
     <button id="lomake-laheta">Lähetä tarjouspyyntö</button>
   `;
 
@@ -226,27 +267,30 @@ function naytaLomake(palvelu) {
     const nimi = document.getElementById('lomake-nimi').value.trim();
     const puhelin = document.getElementById('lomake-puhelin').value.trim();
     const sahkoposti = document.getElementById('lomake-sahkoposti').value.trim();
+    const osoite = document.getElementById('lomake-osoite').value.trim();
+    const postinumero = document.getElementById('lomake-postinumero').value.trim();
+    const viesti = document.getElementById('lomake-viesti').value.trim();
 
-    if (!nimi || (!puhelin && !sahkoposti)) {
-      alert('Täytä nimi ja vähintään puhelinnumero tai sähköposti.');
+    if (!nimi || !puhelin || !sahkoposti || !postinumero) {
+      alert('Täytä kaikki pakolliset kentät (*).');
       return;
     }
 
     kontti.remove();
-    lisaaViesti(`${nimi} — ${puhelin || sahkoposti}`, 'kayttaja');
+    lisaaViesti(`${nimi} — ${puhelin}`, 'kayttaja');
 
-    await fetch('/api/tarjous', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ asiakas, palvelu, nimi, puhelin, sahkoposti })
-    });
+    try {
+      await fetch('/api/tarjous', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ asiakas, palvelu, nimi, puhelin, sahkoposti, osoite, postinumero, viesti })
+      });
+    } catch (virhe) {
+      console.error('Tarjouspyynnön tallennus epäonnistui', virhe);
+    }
 
     lisaaViesti('Kiitos! Olemme sinuun yhteydessä pian tarjouksen kanssa.', 'botti');
-
-    const asetukset = await fetch('/api/asetukset/' + asiakas).then(r => r.json());
-    if (asetukset.vainPikavalinnat && asetukset.pikavalinnat) {
-      naytaPikavalinnat(asetukset.pikavalinnat);
-    }
+    naytaPikavalinnatUudelleen();
   });
 }
 
