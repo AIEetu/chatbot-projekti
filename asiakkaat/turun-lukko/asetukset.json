@@ -6,9 +6,16 @@
   "logo": "/logot/turun-lukko.png",
   "vainPikavalinnat": true,
   "pikavalinnat": [
-    "Varaa aika huollolle",
-    "Haluan tarjouksen",
-    "Lisätietoa palveluista",
-    "Muut asiat"
+    { "teksti": "Varaa aika huollolle", "kysymys": "Haluan varata ajan huollolle" },
+    {
+      "teksti": "Haluan tarjouksen",
+      "alavalinnat": [
+        { "teksti": "Lukon vaihto", "lomake": true },
+        { "teksti": "Turvalukitusjärjestelmä", "lomake": true },
+        { "teksti": "Kassakaapin avaus", "lomake": true }
+      ]
+    },
+    { "teksti": "Lisätietoa palveluista", "kysymys": "Kerro lisätietoa palveluistanne" },
+    { "teksti": "Muut asiat", "kysymys": "Minulla on jokin muu kysymys" }
   ]
 }

@@ -100,6 +100,27 @@
   .pikanappi:hover {
     background: var(--paavari);
     color: white;
+    #lomake {
+    padding: 12px 16px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  #lomake input {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  #lomake input:focus { border-color: var(--paavari); outline: none; }
+  #lomake button {
+    background: var(--paavari);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 4px;
+  }
   }
 
   #alaosa {
@@ -165,19 +186,68 @@ function naytaPikavalinnat(vaihtoehdot) {
   const kontti = document.createElement('div');
   kontti.id = 'pikavalinnat';
 
-  vaihtoehdot.forEach(teksti => {
+  vaihtoehdot.forEach(valinta => {
     const nap = document.createElement('button');
     nap.className = 'pikanappi';
-    nap.textContent = teksti;
+    nap.textContent = valinta.teksti;
     nap.addEventListener('click', () => {
       kontti.remove();
-      lahetaValmisKysymys(teksti);
+      lisaaViesti(valinta.teksti, 'kayttaja');
+
+      if (valinta.alavalinnat) {
+        naytaPikavalinnat(valinta.alavalinnat);
+      } else if (valinta.lomake) {
+        naytaLomake(valinta.teksti);
+      } else {
+        lahetaValmisKysymys(valinta.kysymys, valinta.teksti);
+      }
     });
     kontti.appendChild(nap);
   });
 
   chat.appendChild(kontti);
   chat.scrollTop = chat.scrollHeight;
+}
+function naytaLomake(palvelu) {
+  const kontti = document.createElement('div');
+  kontti.id = 'lomake';
+
+  kontti.innerHTML = `
+    <input type="text" id="lomake-nimi" placeholder="Nimi">
+    <input type="tel" id="lomake-puhelin" placeholder="Puhelinnumero">
+    <input type="email" id="lomake-sahkoposti" placeholder="Sähköposti">
+    <button id="lomake-laheta">Lähetä tarjouspyyntö</button>
+  `;
+
+  chat.appendChild(kontti);
+  chat.scrollTop = chat.scrollHeight;
+
+  document.getElementById('lomake-laheta').addEventListener('click', async () => {
+    const nimi = document.getElementById('lomake-nimi').value.trim();
+    const puhelin = document.getElementById('lomake-puhelin').value.trim();
+    const sahkoposti = document.getElementById('lomake-sahkoposti').value.trim();
+
+    if (!nimi || (!puhelin && !sahkoposti)) {
+      alert('Täytä nimi ja vähintään puhelinnumero tai sähköposti.');
+      return;
+    }
+
+    kontti.remove();
+    lisaaViesti(`${nimi} — ${puhelin || sahkoposti}`, 'kayttaja');
+
+    await fetch('/api/tarjous', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ asiakas, palvelu, nimi, puhelin, sahkoposti })
+    });
+
+    lisaaViesti('Kiitos! Olemme sinuun yhteydessä pian tarjouksen kanssa.', 'botti');
+
+    const asetukset = await fetch('/api/asetukset/' + asiakas).then(r => r.json());
+    if (asetukset.vainPikavalinnat && asetukset.pikavalinnat) {
+      naytaPikavalinnat(asetukset.pikavalinnat);
+    }
+  });
 }
 
 async function lahetaValmisKysymys(teksti) {
