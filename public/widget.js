@@ -44,11 +44,10 @@
     onlinePallo.style.cssText = `
       position: absolute;
       top: -2px;
-      right: -2px;
-      width: 16px;
-      height: 16px;
+      right: 0px;
+      width: 20px;
+      height: 20px;
       background: #22c55e;
-      border: 2px solid white;
       border-radius: 50%;
     `;
 
