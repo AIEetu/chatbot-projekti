@@ -11,14 +11,20 @@
       asetukset = { paavari: '#2563eb', logo: null };
     }
 
+    const kuori = document.createElement('div');
+    kuori.style.cssText = `
+      position: fixed; bottom: 20px; right: 20px;
+      width: 60px; height: 60px;
+      z-index: 999999;
+    `;
+
     const nappi = document.createElement('div');
     nappi.style.cssText = `
-      position: fixed; bottom: 20px; right: 20px;
-      width: 60px; height: 60px; border-radius: 50%;
+      width: 100%; height: 100%; border-radius: 50%;
       background: ${asetukset.paavari || '#2563eb'};
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      z-index: 999999; transition: transform 0.2s;
+      transition: transform 0.2s;
       overflow: hidden;
       border: 1px solid black;
     `;
@@ -42,12 +48,15 @@
       width: 16px;
       height: 16px;
       background: #22c55e;
+      border: 2px solid white;
       border-radius: 50%;
     `;
-    nappi.appendChild(onlinePallo);
 
-    nappi.addEventListener('mouseenter', () => { nappi.style.transform = 'scale(1.08)'; });
-    nappi.addEventListener('mouseleave', () => { nappi.style.transform = 'scale(1)'; });
+    kuori.addEventListener('mouseenter', () => { nappi.style.transform = 'scale(1.08)'; });
+    kuori.addEventListener('mouseleave', () => { nappi.style.transform = 'scale(1)'; });
+
+    kuori.appendChild(nappi);
+    kuori.appendChild(onlinePallo);
 
     const ikkuna = document.createElement('iframe');
     ikkuna.src = RENDER_OSOITE + '/widget-chat.html?asiakas=' + encodeURIComponent(asiakas);
@@ -58,7 +67,7 @@
       display: none; z-index: 999999; background: white;
     `;
 
-    document.body.appendChild(nappi);
+    document.body.appendChild(kuori);
     document.body.appendChild(ikkuna);
 
     window.addEventListener('message', (event) => {
@@ -67,7 +76,7 @@
       }
     });
 
-    nappi.addEventListener('click', () => {
+    kuori.addEventListener('click', () => {
       ikkuna.style.display = ikkuna.style.display === 'none' ? 'block' : 'none';
     });
   }
