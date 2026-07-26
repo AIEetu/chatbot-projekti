@@ -1,3 +1,6 @@
+
+
+Widget chat · HTML
 <!DOCTYPE html>
 <html lang="fi">
 <head>
@@ -231,7 +234,8 @@ function naytaPikavalinnat(vaihtoehdot) {
       } else if (valinta.lomake) {
         naytaLomake(valinta.teksti);
       } else {
-        lahetaValmisKysymys(valinta.kysymys, valinta.teksti, true);
+        const eiUudelleen = valinta.eiUudelleenNaytolla === true;
+        lahetaValmisKysymys(valinta.kysymys, valinta.teksti, true, eiUudelleen);
       }
     });
     kontti.appendChild(nap);
@@ -366,7 +370,7 @@ async function naytaPikavalinnatUudelleen() {
   }
 }
  
-async function lahetaValmisKysymys(kysymys, naytettavaTeksti, viestiJoNaytetty) {
+async function lahetaValmisKysymys(kysymys, naytettavaTeksti, viestiJoNaytetty, eiUudelleenNaytolla) {
   if (!viestiJoNaytetty) {
     lisaaViesti(naytettavaTeksti || kysymys, 'kayttaja');
   }
@@ -379,7 +383,9 @@ async function lahetaValmisKysymys(kysymys, naytettavaTeksti, viestiJoNaytetty) 
   const data = await vastaus.json();
   lisaaViesti(data.vastaus, 'botti');
  
-  naytaPikavalinnatUudelleen();
+  if (!eiUudelleenNaytolla) {
+    naytaPikavalinnatUudelleen();
+  }
 }
  
 async function alusta() {
@@ -452,4 +458,3 @@ document.getElementById('tyhjenna').addEventListener('click', () => {
 </script>
 </body>
 </html>
- 
