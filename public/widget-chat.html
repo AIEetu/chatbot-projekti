@@ -283,7 +283,6 @@ function naytaLomake(palvelu) {
     }
 
     kontti.remove();
-    lisaaViesti(`${nimi} — ${puhelin}`, 'kayttaja');
 
     try {
       await fetch('/api/tarjous', {
@@ -296,7 +295,6 @@ function naytaLomake(palvelu) {
     }
 
     lisaaViesti('Kiitos! Olemme sinuun yhteydessä pian tarjouksen kanssa.', 'botti');
-    naytaPikavalinnatUudelleen();
   });
 }
 
