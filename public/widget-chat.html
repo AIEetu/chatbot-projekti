@@ -235,7 +235,7 @@ function naytaPikavalinnat(vaihtoehdot) {
       } else if (valinta.lomake) {
         naytaLomake(valinta.teksti);
       } else if (valinta.palaute) {
-        naytaPalaute();
+        naytaPalaute(valinta.teksti);
       } else {
         const piilotaToistona = valinta.piilotaToistona === true;
         lahetaValmisKysymys(valinta.kysymys, valinta.teksti, true, piilotaToistona ? valinta.teksti : null);
@@ -362,7 +362,7 @@ function naytaLomake(palvelu, paiva, aika) {
   });
 }
 
-function naytaPalaute() {
+function naytaPalaute(omaTeksti) {
   const kontti = document.createElement('div');
   kontti.id = 'palaute';
 
@@ -393,8 +393,8 @@ function naytaPalaute() {
       console.error('Palautteen tallennus epäonnistui', virhe);
     }
 
-  lisaaViesti('Kiitos palautteesta!', 'botti');
-    naytaPikavalinnatUudelleen('Muut asiat');
+    lisaaViesti('Kiitos palautteesta!', 'botti');
+    naytaPikavalinnatUudelleen(omaTeksti);
   });
 }
 
