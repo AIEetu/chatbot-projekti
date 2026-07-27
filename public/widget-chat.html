@@ -393,7 +393,8 @@ function naytaPalaute() {
       console.error('Palautteen tallennus epäonnistui', virhe);
     }
 
-    lisaaViesti('Kiitos palautteesta!', 'botti');
+  lisaaViesti('Kiitos palautteesta!', 'botti');
+    naytaPikavalinnatUudelleen('Muut asiat');
   });
 }
 
