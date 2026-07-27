@@ -26,7 +26,7 @@
       "teksti": "Muut asiat",
       "alavalinnat": [
         { "teksti": "Kysy jotain muuta", "kysymys": "Minulla on jokin muu kysymys" },
-        { "teksti": "Jätä palaute", "lomake": true }
+        { "teksti": "Jätä palaute", "palaute": true }
       ]
     }
   ]
