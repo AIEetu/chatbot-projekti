@@ -22,6 +22,10 @@
       ]
     },
     { "teksti": "Lisätietoa palveluista", "kysymys": "Kerro lisätietoa palveluistanne", "piilotaToistona": true },
-    { "teksti": "Muut asiat", "kysymys": "Minulla on jokin muu kysymys" }
+{
+  "teksti": "Muut asiat",
+  "alavalinnat": [
+    { "teksti": "Kysy jotain muuta", "kysymys": "Minulla on jokin muu kysymys" },
+    { "teksti": "Jätä palaute", "lomake": true }
   ]
 }
