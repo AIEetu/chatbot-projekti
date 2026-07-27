@@ -22,6 +22,6 @@
       ]
     },
     { "teksti": "Lisätietoa palveluista", "kysymys": "Kerro lisätietoa palveluistanne", "piilotaToistona": true },
-    { "teksti": "Muut asiat", "palaute": true }
+    { "teksti": "Jätä palautetta", "palaute": true }
   ]
 }
