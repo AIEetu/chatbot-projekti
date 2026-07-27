@@ -1,19 +1,27 @@
-"pikavalinnat": [
-  {
-    "teksti": "Varaa aika huollolle",
-    "alavalinnat": [
-      { "teksti": "Lukkojen sarjoitus tai vaihto", "varaus": true },
-      { "teksti": "Hätäaukaisu (ei kiireellinen)", "varaus": true }
-    ]
-  },
-  {
-    "teksti": "Haluan tarjouksen",
-    "alavalinnat": [
-      { "teksti": "Lukon vaihto", "lomake": true },
-      { "teksti": "Turvalukitusjärjestelmä", "lomake": true },
-      { "teksti": "Kassakaapin avaus", "lomake": true }
-    ]
-  },
-  { "teksti": "Lisätietoa palveluista", "kysymys": "Kerro lisätietoa palveluistanne", "piilotaToistona": true },
-  { "teksti": "Muut asiat", "palaute": true }
-]
+{
+  "nimi": "Turun Lukko",
+  "tervehdys": "Hei! Olen Turun Lukon avustaja. Miten voin auttaa lukitusasioissa?",
+  "persoona": "Olet ammattimainen ja luotettava asiakaspalvelija lukkosepänliikkeessä. Puhut asiallisesti mutta ystävällisesti.",
+  "paavari": "#2563eb",
+  "logo": "/logot/turun-lukko.png",
+  "vainPikavalinnat": true,
+  "pikavalinnat": [
+    {
+      "teksti": "Varaa aika huollolle",
+      "alavalinnat": [
+        { "teksti": "Lukkojen sarjoitus tai vaihto", "varaus": true },
+        { "teksti": "Hätäaukaisu (ei kiireellinen)", "varaus": true }
+      ]
+    },
+    {
+      "teksti": "Haluan tarjouksen",
+      "alavalinnat": [
+        { "teksti": "Lukon vaihto", "lomake": true },
+        { "teksti": "Turvalukitusjärjestelmä", "lomake": true },
+        { "teksti": "Kassakaapin avaus", "lomake": true }
+      ]
+    },
+    { "teksti": "Lisätietoa palveluista", "kysymys": "Kerro lisätietoa palveluistanne", "piilotaToistona": true },
+    { "teksti": "Muut asiat", "palaute": true }
+  ]
+}
