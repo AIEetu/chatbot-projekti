@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metsäranta Koti — chatbot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1b211c;
+    --pine: #2f3e33;
+    --pine-deep: #212b23;
+    --pine-light: #4a5c4e;
+    --sand: #c9af86;
+    --sand-light: #e8dcc3;
+    --paper: #f7f4ee;
+    --mist: #e4e2d8;
+    --white: #ffffff;
+    --radius-lg: 22px;
+    --radius-md: 14px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    font-family: 'Inter', Arial, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  h1, h2, h3, .display {
+    font-family: 'Fraunces', Georgia, serif;
+  }
+
+  /* ================= blueprint SVG background pattern ================= */
+  .blueprint-bg {
+    position: absolute;
+    inset: 0;
+    background-color: var(--pine);
+    overflow: hidden;
+  }
+
+  .blueprint-bg svg {
+    position: absolute;
+    opacity: 0.16;
+  }
+
+  .blueprint-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(33,43,35,0.15) 0%, rgba(33,43,35,0.75) 100%);
+  }
+
+  /* ================= launcher ================= */
+  .launcher {
+    position: fixed;
+    bottom: 22px;
+    right: 22px;
+    display: flex;
+    align-items: center;
+    background: var(--pine);
+    border-radius: 999px;
+    padding: 6px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 26px rgba(33,43,35,0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    z-index: 1000;
+  }
+
+  .launcher:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px rgba(33,43,35,0.4);
+  }
+
+  .launcher .label {
+    color: var(--white);
+    font-size: 14.5px;
+    font-weight: 500;
+    padding: 0 14px 0 18px;
+    white-space: nowrap;
+  }
+
+  .launcher .icon-circle {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--sand);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .launcher .icon-circle svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--pine-deep);
+  }
+
+  /* ================= panel ================= */
+  .panel {
+    position: fixed;
+    bottom: 22px;
+    right: 22px;
+    width: 380px;
+    max-width: calc(100vw - 24px);
+    height: 620px;
+    max-height: calc(100vh - 48px);
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 30px 70px rgba(0,0,0,0.35);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1000;
+  }
+
+  .panel.open {
+    display: flex;
+    animation: rise 0.3s cubic-bezier(.2,.8,.3,1);
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(24px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ---- hero header with blueprint art ---- */
+  .panel-hero {
+    position: relative;
+    padding: 20px 20px 22px;
+    color: var(--white);
+    flex-shrink: 0;
+  }
+
+  .panel-hero .top-row {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+
+  .brand-mark {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .brand-mark .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--sand);
+  }
+
+  .close-btn {
+    background: rgba(255,255,255,0.12);
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    color: var(--white);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .close-btn:hover { background: rgba(255,255,255,0.22); }
+
+  .panel-hero h2 {
+    position: relative;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 6px;
+    line-height: 1.25;
+  }
+
+  .panel-hero .sub {
+    position: relative;
+    font-size: 13.5px;
+    color: var(--sand-light);
+    line-height: 1.45;
+    max-width: 88%;
+  }
+
+  /* ---- body / scroll area ---- */
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--paper);
+  }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ---- home menu ---- */
+  .menu-list {
+    display: flex;
+    flex-direction: column;
+    padding: 6px 0;
+  }
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 20px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--mist);
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14.5px;
+    color: var(--ink);
+    transition: background 0.15s ease;
+  }
+
+  .menu-item:hover { background: var(--sand-light); }
+
+  .menu-item .m-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--pine);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .menu-item .m-icon svg {
+    width: 17px;
+    height: 17px;
+    stroke: var(--sand-light);
+  }
+
+  .menu-item .m-text strong {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .menu-item .m-text span {
+    color: #6b6b63;
+    font-size: 12.5px;
+  }
+
+  .menu-item .chevron {
+    margin-left: auto;
+    color: #b7b6ad;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  /* ---- section header inside a view (with back) ---- */
+  .view-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--mist);
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--pine-deep);
+    cursor: pointer;
+    background: var(--white);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+
+  .view-header svg { width: 16px; height: 16px; stroke: var(--pine-deep); }
+
+  /* ---- kohteet (project cards) ---- */
+  .project-cards {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .project-card {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--pine);
+    position: relative;
+    color: var(--white);
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 16px;
+  }
+
+  .project-card .blueprint-bg svg { opacity: 0.22; }
+
+  .project-card .tag {
+    position: relative;
+    align-self: flex-start;
+    background: var(--sand);
+    color: var(--pine-deep);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 999px;
+    margin-bottom: auto;
+  }
+
+  .project-card h3 {
+    position: relative;
+    font-size: 1.15rem;
+    margin: 0 0 4px;
+    font-weight: 600;
+  }
+
+  .project-card p {
+    position: relative;
+    font-size: 12.5px;
+    color: var(--sand-light);
+    margin: 0 0 12px;
+    line-height: 1.4;
+  }
+
+  .project-card a.cta-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--white);
+    color: var(--pine-deep);
+    font-size: 12.5px;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 9px 14px;
+    border-radius: 999px;
+    width: fit-content;
+  }
+
+  /* ---- yritys / referenssit text views ---- */
+  .info-view {
+    padding: 20px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #3a3f39;
+  }
+
+  .info-view h3 {
+    font-size: 1.2rem;
+    color: var(--pine-deep);
+    margin: 0 0 10px;
+  }
+
+  .info-view ul {
+    padding-left: 18px;
+    margin: 14px 0;
+  }
+
+  .info-view li { margin-bottom: 6px; }
+
+  .info-view .cta-link {
+    display: inline-flex;
+    margin-top: 6px;
+    background: var(--pine);
+    color: var(--white);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 999px;
+  }
+
+  /* ---- chat view ---- */
+  .chat-messages {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .msg {
+    max-width: 82%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 13.5px;
+    line-height: 1.45;
+  }
+
+  .msg.bot {
+    background: var(--white);
+    border: 1px solid var(--mist);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+
+  .msg.user {
+    background: var(--pine);
+    color: var(--white);
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+
+  .option-bubble {
+    align-self: flex-start;
+    max-width: 92%;
+    background: var(--sand-light);
+    border: 1px solid var(--sand);
+    color: var(--pine-deep);
+    border-radius: 20px;
+    padding: 12px 16px;
+    font-size: 13.5px;
+    line-height: 1.4;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+
+  .option-bubble:hover { background: var(--sand); }
+
+  .chat-input-row {
+    display: none;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid var(--mist);
+    background: var(--white);
+    flex-shrink: 0;
+  }
+
+  .chat-input-row.active { display: flex; }
+
+  .chat-input-row input {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    padding: 10px 15px;
+    font-size: 13.5px;
+    outline: none;
+    font-family: inherit;
+  }
+
+  .chat-input-row input:focus { border-color: var(--sand); }
+
+  .chat-input-row button {
+    background: var(--pine);
+    border: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .chat-input-row button svg { width: 15px; height: 15px; fill: var(--white); }
+
+  /* ---- bottom nav ---- */
+  .bottom-nav {
+    display: flex;
+    border-top: 1px solid var(--mist);
+    background: var(--white);
+    flex-shrink: 0;
+  }
+
+  .nav-item {
+    flex: 1;
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 10px 0 12px;
+    cursor: pointer;
+    font-size: 10.5px;
+    color: #9a9a90;
+    font-family: inherit;
+    font-weight: 500;
+  }
+
+  .nav-item svg { width: 18px; height: 18px; stroke: #9a9a90; transition: stroke 0.15s ease; }
+
+  .nav-item.active { color: var(--pine); }
+  .nav-item.active svg { stroke: var(--pine); }
+
+  /* ================= contact modal ================= */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(27,33,28,0.45);
+    z-index: 1500;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal-sheet {
+    background: var(--white);
+    width: 100%;
+    max-width: 420px;
+    border-radius: var(--radius-lg);
+    max-height: 92vh;
+    overflow-y: auto;
+    animation: rise 0.25s ease;
+  }
+
+  .modal-head {
+    display: flex;
+    justify-content: flex-end;
+    padding: 14px 16px 0;
+  }
+
+  .modal-head button {
+    background: var(--paper);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-head svg { width: 15px; height: 15px; stroke: var(--pine-deep); }
+
+  .modal-body { padding: 6px 26px 28px; }
+
+  .modal-body h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--pine-deep);
+    margin: 6px 0 8px;
+  }
+
+  .modal-body .sub {
+    font-size: 13.5px;
+    color: #6b6b63;
+    margin: 0 0 20px;
+  }
+
+  .form-field {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: var(--radius-md);
+    padding: 13px 15px;
+    font-size: 14px;
+    font-family: inherit;
+    margin-bottom: 12px;
+    outline: none;
+    color: var(--ink);
+  }
+
+  .form-field:focus { border-color: var(--sand); }
+
+  textarea.form-field { min-height: 100px; resize: vertical; }
+
+  .consent-text {
+    font-size: 12.5px;
+    color: #6b6b63;
+    margin-bottom: 18px;
+    line-height: 1.4;
+  }
+
+  .consent-text a { color: var(--pine); text-decoration: underline; }
+
+  .submit-btn {
+    width: 100%;
+    background: var(--pine);
+    border: none;
+    border-radius: 999px;
+    padding: 15px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+
+  .submit-btn:hover { background: var(--pine-deep); }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 420px) {
+    .panel {
+      right: 8px;
+      left: 8px;
+      width: auto;
+      bottom: 8px;
+      height: calc(100vh - 88px);
+    }
+    .launcher { right: 12px; bottom: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== launcher ===== -->
+<button class="launcher" id="launcher" aria-label="Avaa keskustelu">
+  <span class="label">Kysy kodistasi</span>
+  <span class="icon-circle">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 11l9-7 9 7"/>
+      <path d="M5 10v10h14V10"/>
+      <path d="M9 20v-6h6v6"/>
+    </svg>
+  </span>
+</button>
+
+<!-- ===== main panel ===== -->
+<div class="panel" id="panel">
+
+  <div class="panel-hero" id="heroBlock">
+    <div class="blueprint-bg" id="blueprintTarget"></div>
+    <div class="top-row">
+      <div class="brand-mark"><span class="dot"></span> METSÄRANTA KOTI</div>
+      <button class="close-btn" id="closeBtn" aria-label="Sulje">&times;</button>
+    </div>
+    <h2 class="display">Etsitkö kotia, jossa on hyvä elää?</h2>
+    <div class="sub">Kerromme mielellämme kohteistamme Turun seudulla — vastaamme yleensä nopeasti.</div>
+  </div>
+
+  <div class="panel-body" id="panelBody">
+
+    <!-- HOME VIEW -->
+    <div class="view active" id="view-home">
+      <div class="menu-list">
+        <button class="menu-item" data-action="goto-kohteet">
+          <span class="m-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg></span>
+          <span class="m-text"><strong>Tutustu kohteisiin</strong><span>Kuusiranta &amp; Saaristonkallio</span></span>
+          <span class="chevron">›</span>
+        </button>
+        <button class="menu-item" data-action="chat" data-text="Etsin uutta kotia — mitä kohteita teillä on juuri nyt?">
+          <span class="m-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+          <span class="m-text"><strong>Etsin uutta kotia</strong><span>Kerro toiveesi, autamme</span></span>
+          <span class="chevron">›</span>
+        </button>
+        <button class="menu-item" data-action="goto-yritys">
+          <span class="m-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V8l8-5 8 5v13"/><path d="M9 21v-6h6v6"/></svg></span>
+          <span class="m-text"><strong>Yrityksemme</strong><span>Laatua kohde kerrallaan</span></span>
+          <span class="chevron">›</span>
+        </button>
+        <button class="menu-item" data-action="goto-referenssit">
+          <span class="m-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg></span>
+          <span class="m-text"><strong>Referenssit</strong><span>Aiemmin valmistuneet kohteet</span></span>
+          <span class="chevron">›</span>
+        </button>
+        <button class="menu-item" data-action="open-contact">
+          <span class="m-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 6l8 7 8-7"/></svg></span>
+          <span class="m-text"><strong>Ota yhteyttä</strong><span>Jätä viesti, vastaamme pian</span></span>
+          <span class="chevron">›</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- KOHTEET VIEW -->
+    <div class="view" id="view-kohteet">
+      <div class="view-header" data-back="view-home">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Takaisin
+      </div>
+      <div class="project-cards">
+        <div class="project-card">
+          <div class="blueprint-bg"></div>
+          <span class="tag">Valmistunut 2022</span>
+          <h3 class="display">Kuusirannan rivitalot</h3>
+          <p>Neljä valoisaa rivitaloasuntoa metsän ja meren välissä, aivan Salon keskustan tuntumassa.</p>
+          <a class="cta-link" href="#" onclick="return false;" target="_blank" rel="noopener">Tutustu kohteeseen →</a>
+        </div>
+        <div class="project-card">
+          <div class="blueprint-bg"></div>
+          <span class="tag">Valmistunut 2024</span>
+          <h3 class="display">Saaristonkallion paritalot</h3>
+          <p>Kaksi tyylikästä paritaloa saaristomaisemassa — yksityiset rannat ja omat laiturit.</p>
+          <a class="cta-link" href="#" onclick="return false;" target="_blank" rel="noopener">Tutustu kohteeseen →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- YRITYS VIEW -->
+    <div class="view" id="view-yritys">
+      <div class="view-header" data-back="view-home">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Takaisin
+      </div>
+      <div class="info-view">
+        <h3 class="display">Laatukoteja kohde kerrallaan</h3>
+        <p>Metsäranta Koti Oy on erikoistunut rivi- ja paritalojen rakentamiseen Salon ja Turun seudulla. Rakennamme aina vain yhtä tai kahta kohdetta kerrallaan, jotta voimme keskittää energiamme huolelliseen työhön.</p>
+        <ul>
+          <li>Laatu edellä kaikessa, mitä teemme</li>
+          <li>Moderni ja energiatehokas talotekniikka</li>
+          <li>Käytännölliset mutta tyylikkäät tilat</li>
+          <li>Luotettavat yhteistyökumppanit</li>
+        </ul>
+        <a class="cta-link" href="#" onclick="return false;" target="_blank" rel="noopener">Lue lisää yrityksestä</a>
+      </div>
+    </div>
+
+    <!-- REFERENSSIT VIEW -->
+    <div class="view" id="view-referenssit">
+      <div class="view-header" data-back="view-home">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Takaisin
+      </div>
+      <div class="info-view">
+        <h3 class="display">Aiemmin valmistuneet kohteet</h3>
+        <p>Käsistämme on noussut koteja jo useaan kohteeseen Salon ja Turun talousalueella, mm. Saloon ja Paimioon. Jokainen kohde on suunniteltu pitkäikäiseen, huolettomaan asumiseen.</p>
+        <a class="cta-link" href="#" onclick="return false;" target="_blank" rel="noopener">Selaa kaikkia referenssejä</a>
+      </div>
+    </div>
+
+    <!-- CHAT VIEW -->
+    <div class="view" id="view-chat">
+      <div class="view-header" data-back="view-home">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Takaisin
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg bot">Hei! 👋 Kerro vapaasti, millaista kotia etsit, tai valitse alta.</div>
+        <button class="option-bubble" data-text="Etsin rivitaloa">Etsin rivitaloa</button>
+        <button class="option-bubble" data-text="Etsin paritaloa">Etsin paritaloa</button>
+        <button class="option-bubble" data-text="Haluan kuulla tulevista kohteista ensimmäisenä">Haluan kuulla tulevista kohteista ensimmäisenä</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="chat-input-row" id="chatInputRow">
+    <input type="text" id="chatInput" placeholder="Kirjoita viesti...">
+    <button id="sendBtn" aria-label="Lähetä">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-item active" data-tab="view-home">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+      Koti
+    </button>
+    <button class="nav-item" data-tab="view-kohteet">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>
+      Kohteet
+    </button>
+    <button class="nav-item" data-tab="view-chat">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Chat
+    </button>
+  </div>
+</div>
+
+<!-- ===== contact modal ===== -->
+<div class="modal-overlay" id="contactModal">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <button id="closeModal" aria-label="Sulje">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <h2 class="display">Jätä yhteydenottopyyntö</h2>
+      <p class="sub">Vastaamme sinulle mahdollisimman pian.</p>
+      <form id="contactForm">
+        <textarea class="form-field" placeholder="Viesti *" required></textarea>
+        <input class="form-field" type="text" placeholder="Nimi">
+        <input class="form-field" type="email" placeholder="Sähköposti *" required>
+        <input class="form-field" type="tel" placeholder="Puhelinnumero">
+        <p class="consent-text">Klikkaamalla hyväksyt <a href="#" onclick="return false;">käyttöehdot</a></p>
+        <button type="submit" class="submit-btn">Lähetä viesti</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- generate blueprint-style SVG line art and inject into every .blueprint-bg ----------
+  function blueprintSVG() {
+    return `
+    <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <g fill="none" stroke="#c9af86" stroke-width="1.2">
+        <path d="M20 180 L90 120 L160 180" />
+        <rect x="35" y="180" width="110" height="70" />
+        <line x1="90" y1="180" x2="90" y2="250" />
+        <rect x="55" y="200" width="20" height="20" />
+        <rect x="105" y="200" width="20" height="20" />
+        <path d="M180 210 L250 150 L320 210" />
+        <rect x="195" y="210" width="110" height="60" />
+        <line x1="250" y1="210" x2="250" y2="270" />
+        <rect x="215" y="225" width="18" height="18" />
+        <rect x="265" y="225" width="18" height="18" />
+        <line x1="20" y1="270" x2="160" y2="270" stroke-dasharray="4 4" />
+        <line x1="180" y1="285" x2="320" y2="285" stroke-dasharray="4 4" />
+        <path d="M0 90 L60 55 L120 90 L180 55 L240 90 L300 55 L360 90 L400 70" stroke-width="1" opacity="0.6" />
+        <circle cx="350" cy="40" r="18" />
+        <line x1="350" y1="24" x2="350" y2="56" />
+        <line x1="334" y1="40" x2="366" y2="40" />
+      </g>
+    </svg>`;
+  }
+
+  document.querySelectorAll('.blueprint-bg').forEach(el => {
+    el.innerHTML = blueprintSVG();
+  });
+
+  // ---------- launcher / panel open-close ----------
+  const launcher = document.getElementById('launcher');
+  const panel = document.getElementById('panel');
+  const closeBtn = document.getElementById('closeBtn');
+
+  launcher.addEventListener('click', () => {
+    panel.classList.add('open');
+    launcher.style.display = 'none';
+  });
+  closeBtn.addEventListener('click', () => {
+    panel.classList.remove('open');
+    launcher.style.display = 'flex';
+  });
+
+  // ---------- view + tab switching ----------
+  const views = document.querySelectorAll('.view');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  function showView(id) {
+    views.forEach(v => v.classList.toggle('active', v.id === id));
+    navItems.forEach(n => n.classList.toggle('active', n.dataset.tab === id));
+    document.getElementById('chatInputRow').classList.toggle('active', id === 'view-chat');
+  }
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => showView(item.dataset.tab));
+  });
+
+  document.querySelectorAll('[data-back]').forEach(el => {
+    el.addEventListener('click', () => showView(el.dataset.back));
+  });
+
+  // ---------- chat logic ----------
+  const chatMessages = document.getElementById('chatMessages');
+
+  function addMessage(text, sender) {
+    const el = document.createElement('div');
+    el.className = 'msg ' + sender;
+    el.textContent = text;
+    chatMessages.appendChild(el);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function clearOptionBubbles() {
+    chatMessages.querySelectorAll('.option-bubble').forEach(b => b.remove());
+  }
+
+  // ---------- YHDISTETTY OIKEAAN BACKENDIIN ----------
+  async function botReply(kysymys) {
+    try {
+      const vastaus = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kysymys, asiakas: 'metsaranta-koti' })
+      });
+      const data = await vastaus.json();
+      addMessage(data.vastaus, 'bot');
+    } catch (virhe) {
+      addMessage('Pahoittelut, jotain meni pieleen. Yritä hetken päästä uudelleen.', 'bot');
+    }
+  }
+
+  function sendToChat(text) {
+    showView('view-chat');
+    clearOptionBubbles();
+    addMessage(text, 'user');
+    botReply(text);
+  }
+
+  document.querySelectorAll('.option-bubble').forEach(btn => {
+    btn.addEventListener('click', () => sendToChat(btn.dataset.text));
+  });
+
+  document.getElementById('sendBtn')?.addEventListener('click', sendFromInput);
+
+  const chatInput = document.getElementById('chatInput');
+  chatInput?.addEventListener('keydown', e => { if (e.key === 'Enter') sendFromInput(); });
+
+  function sendFromInput() {
+    if (!chatInput.value.trim()) return;
+    const teksti = chatInput.value;
+    clearOptionBubbles();
+    addMessage(teksti, 'user');
+    chatInput.value = '';
+    botReply(teksti);
+  }
+
+  // ---------- home menu item actions ----------
+  document.querySelectorAll('.menu-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.action;
+      if (action === 'goto-kohteet') showView('view-kohteet');
+      else if (action === 'goto-yritys') showView('view-yritys');
+      else if (action === 'goto-referenssit') showView('view-referenssit');
+      else if (action === 'open-contact') openContactModal();
+      else if (action === 'chat') sendToChat(btn.dataset.text);
+    });
+  });
+
+  // ---------- contact modal ----------
+  const contactModal = document.getElementById('contactModal');
+  const contactForm = document.getElementById('contactForm');
+
+  function openContactModal() { contactModal.classList.add('open'); }
+  function closeContactModal() { contactModal.classList.remove('open'); }
+
+  document.getElementById('closeModal').addEventListener('click', closeContactModal);
+  contactModal.addEventListener('click', e => { if (e.target === contactModal) closeContactModal(); });
+
+  contactForm.addEventListener('submit', e => {
+    e.preventDefault();
+    alert('Kiitos viestistäsi! (demo — ei lähetä oikeasti mihinkään)');
+    contactForm.reset();
+    closeContactModal();
+  });
+</script>
+
+</body>
+</html>

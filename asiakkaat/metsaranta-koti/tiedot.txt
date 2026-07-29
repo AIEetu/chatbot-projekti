@@ -1,0 +1,135 @@
+{
+  "nimi": "Metsäranta Koti",
+  "tervehdys": "Hei! Kerro vapaasti, millaista kotia etsit, tai valitse alta.",
+  "persoona": "Olet lämmin ja asiantunteva asiakaspalvelija rakennusliikkeessä, joka rakentaa laadukkaita rivi- ja paritaloja. Puhut rauhallisesti ja luottamusta herättävästi."
+}
+{
+  "yritys": {
+    "nimi": "Metsäranta Koti Oy",
+    "ytunnus": "3123456-9",
+    "toimiala": "Rakennusliike — erikoistunut rivi- ja paritalojen rakentamiseen",
+    "toimialue": "Salo, Turku ja lähikunnat (mm. Paimio, Halikko, Kemiö)",
+    "perustettu": 2015,
+    "slogan": "Koteja, joissa metsä ja meri kohtaavat",
+    "esittely": "Metsäranta Koti Oy rakentaa laadukkaita rivi- ja paritaloja Salon ja Turun seudulla. Rakennamme aina vain yhtä tai kahta kohdetta kerrallaan, jotta voimme keskittää kaiken huomiomme huolelliseen työhön ja yksilölliseen asiakaspalveluun. Arvostamme kestäviä materiaaleja, energiatehokasta talotekniikkaa ja luonnonläheistä sijaintia.",
+    "arvot": [
+      "Laatu edellä kaikessa, mitä teemme",
+      "Vain sen verran kohteita kerrallaan kuin voimme hoitaa kunnolla",
+      "Moderni ja energiatehokas talotekniikka",
+      "Käytännölliset mutta tyylikkäät tilat",
+      "Luotettavat, pitkäaikaiset yhteistyökumppanit",
+      "Rehellinen ja avoin viestintä asiakkaan kanssa koko prosessin ajan"
+    ]
+  },
+
+  "yhteystiedot": {
+    "puhelin": "+358 44 123 4567",
+    "sahkoposti": "toimisto@metsarantakoti.fi",
+    "osoite": "Rantatie 8, 24100 Salo",
+    "aukioloajat": "Ma–Pe 9:00–16:00 (puhelinaika), tapaamiset sopimuksen mukaan myös iltaisin",
+    "somekanavat": {
+      "facebook": "facebook.com/metsarantakoti",
+      "instagram": "instagram.com/metsarantakoti"
+    }
+  },
+
+  "palvelut": [
+    {
+      "nimi": "Uudiskohteiden rakentaminen",
+      "kuvaus": "Rivi- ja paritalojen suunnittelu ja rakentaminen avaimet käteen -periaatteella, omalle tontille tai valmiille asuinalueelle."
+    },
+    {
+      "nimi": "Tontinetsintä ja -kartoitus",
+      "kuvaus": "Autamme löytämään ja arvioimaan sopivan tontin uudiskohteelle, mukaan lukien kaavoitus- ja rakennusoikeusselvitykset."
+    },
+    {
+      "nimi": "Yksilölliset muutostyöt",
+      "kuvaus": "Mahdollisuus muokata pohjaratkaisuja, materiaaleja ja talotekniikkaa asiakkaan toiveiden mukaan rakennusvaiheessa."
+    },
+    {
+      "nimi": "Jälkimarkkinointi ja takuuhuolto",
+      "kuvaus": "Kahden vuoden takuuajan huoltopalvelu sekä nopea reagointi mahdollisiin puutteisiin muuton jälkeen."
+    }
+  ],
+
+  "hinnoittelu": {
+    "huom": "Hinnat ovat suuntaa-antavia esimerkkejä demokäyttöön. Lopullinen hinta määräytyy aina kohteen koon, sijainnin, materiaalivalintojen ja tontin mukaan — tarkka tarjous annetaan aina erikseen.",
+    "rivitaloasunto": {
+      "koko": "65–95 m²",
+      "hintahaarukka": "285 000 € – 385 000 €",
+      "sisaltaa": "Avaimet käteen -toteutus, oma piha-alue tai terassi, autokatos"
+    },
+    "paritalo_puolikas": {
+      "koko": "110–140 m²",
+      "hintahaarukka": "420 000 € – 540 000 €",
+      "sisaltaa": "Avaimet käteen -toteutus, oma tontti tai tontin osa, autotalli"
+    },
+    "lisatietoja": "Rahoitusneuvontaa tarjotaan yhteistyössä paikallisten pankkikumppaneiden kanssa. Ennakkomarkkinointivaiheessa varausmaksu on tyypillisesti 2 000 €."
+  },
+
+  "kohteet_myynnissa": [
+    {
+      "nimi": "Kuusiranta",
+      "sijainti": "Salo, n. 3 km keskustasta",
+      "tyyppi": "Rivitalo, 4 asuntoa",
+      "koot": "68–92 m²",
+      "valmistuu": "Kevät 2027",
+      "tilanne": "Myynnissä — 2 asuntoa varattu, 2 vapaana",
+      "kuvaus": "Valoisia, moderneja rivitaloasuntoja metsän ja pienen järven läheisyydessä. Kävelymatka päiväkotiin ja kouluun.",
+      "hintahaarukka": "289 000 € – 349 000 €"
+    },
+    {
+      "nimi": "Saaristonkallio",
+      "sijainti": "Kemiönsaari, meren rannalla",
+      "tyyppi": "Paritalo, 2 puolikasta",
+      "koot": "125–135 m²",
+      "valmistuu": "Syksy 2027",
+      "tilanne": "Ennakkomarkkinoinnissa",
+      "kuvaus": "Kaksi tyylikästä paritaloasuntoa omalla rantaviivalla ja laiturilla. Suunniteltu ympärivuotiseen asumiseen, mutta sopii myös vapaa-ajan kodiksi.",
+      "hintahaarukka": "465 000 € – 540 000 €"
+    }
+  ],
+
+  "referenssit_valmistuneet": [
+    {
+      "nimi": "Männistönrinne",
+      "sijainti": "Salo",
+      "tyyppi": "Rivitalo, 6 asuntoa",
+      "valmistunut": 2023,
+      "kuvaus": "Ensimmäinen suuremman mittakaavan rivitalokohteemme, myyty täysin loppuun ennen valmistumista."
+    },
+    {
+      "nimi": "Honkaranta",
+      "sijainti": "Paimio",
+      "tyyppi": "Paritalo, 2 puolikasta",
+      "valmistunut": 2022,
+      "kuvaus": "Metsän reunalla sijaitseva paritalokohde, jossa molemmissa puolikkaissa oma sauna ja terassi."
+    },
+    {
+      "nimi": "Merituulentie",
+      "sijainti": "Halikko",
+      "tyyppi": "Rivitalo, 5 asuntoa",
+      "valmistunut": 2021,
+      "kuvaus": "Ensimmäinen energialuokan A kohteemme, jossa panostettiin erityisesti maalämpöön ja aurinkopaneeleihin."
+    }
+  ],
+
+  "usein_kysytyt_kysymykset": [
+    {
+      "kysymys": "Voiko asunnon pohjaratkaisua muokata?",
+      "vastaus": "Kyllä, tietyissä rajoissa. Mikäli olet mukana riittävän aikaisessa vaiheessa rakennusprosessia, voimme usein muokata esimerkiksi väliseiniä, kalusteita ja pintamateriaaleja toiveidesi mukaan."
+    },
+    {
+      "kysymys": "Miten varaan asunnon?",
+      "vastaus": "Varaus tehdään varausmaksulla (tyypillisesti 2 000 €), joka vahvistaa paikkasi kohteessa. Lopullinen kauppakirja allekirjoitetaan rakennusvaiheen alussa."
+    },
+    {
+      "kysymys": "Onko kohteissa energiatehokas talotekniikka?",
+      "vastaus": "Kyllä, kaikissa uusissa kohteissamme käytetään maalämpöä tai ilma-vesilämpöpumppua sekä koneellista tulo- ja poistoilmanvaihtoa lämmöntalteenotolla."
+    },
+    {
+      "kysymys": "Kuinka pitkä takuu rakennuksilla on?",
+      "vastaus": "Annamme kaikille kohteillemme kahden vuoden takuuajan, jonka aikana korjaamme mahdolliset puutteet kustannuksitta."
+    }
+  ]
+}
