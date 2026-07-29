@@ -70,6 +70,12 @@
     box-shadow: 0 10px 26px rgba(33,43,35,0.35);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     z-index: 1000;
+    animation: launcherPop 0.5s cubic-bezier(.34,1.56,.64,1) 0.3s both;
+  }
+
+  @keyframes launcherPop {
+    from { opacity: 0; transform: scale(0.7) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
   }
 
   .launcher:hover {
@@ -202,8 +208,16 @@
     background: var(--paper);
   }
 
-  .view { display: none; }
+  .view {
+    display: none;
+    animation: viewIn 0.25s cubic-bezier(.2,.8,.3,1) both;
+  }
   .view.active { display: block; }
+
+  @keyframes viewIn {
+    from { opacity: 0; transform: translateX(8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
 
   /* ---- home menu ---- */
   .menu-list {
@@ -398,6 +412,12 @@
     border-radius: 14px;
     font-size: 13.5px;
     line-height: 1.45;
+    animation: msgIn 0.3s cubic-bezier(.2,.8,.3,1) both;
+  }
+
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .msg.bot {
@@ -414,6 +434,30 @@
     border-bottom-right-radius: 4px;
   }
 
+  .typing-indicator {
+    align-self: flex-start;
+    background: var(--white);
+    border: 1px solid var(--mist);
+    border-radius: 14px;
+    border-bottom-left-radius: 4px;
+    padding: 12px 16px;
+    display: flex;
+    gap: 4px;
+    animation: msgIn 0.3s cubic-bezier(.2,.8,.3,1) both;
+  }
+  .typing-indicator span {
+    width: 6px; height: 6px;
+    background: var(--pine-light);
+    border-radius: 50%;
+    animation: bounce 1.2s infinite ease-in-out;
+  }
+  .typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+
   .option-bubble {
     align-self: flex-start;
     max-width: 92%;
@@ -427,10 +471,11 @@
     text-align: left;
     cursor: pointer;
     font-family: inherit;
-    transition: background 0.15s ease;
+    transition: background 0.15s ease, transform 0.15s ease;
   }
 
-  .option-bubble:hover { background: var(--sand); }
+  .option-bubble:hover { background: var(--sand); transform: translateY(-1px); }
+  .option-bubble:active { transform: translateY(0) scale(0.98); }
 
   .chat-input-row {
     display: none;
@@ -868,8 +913,14 @@
     chatMessages.querySelectorAll('.option-bubble').forEach(b => b.remove());
   }
 
-  // ---------- YHDISTETTY OIKEAAN BACKENDIIN ----------
+  // ---------- YHDISTETTY OIKEAAN BACKENDIIN + "kirjoittaa..." -indikaattori ----------
   async function botReply(kysymys) {
+    const kirjoittaa = document.createElement('div');
+    kirjoittaa.className = 'typing-indicator';
+    kirjoittaa.innerHTML = '<span></span><span></span><span></span>';
+    chatMessages.appendChild(kirjoittaa);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
     try {
       const vastaus = await fetch('/api/chat', {
         method: 'POST',
@@ -877,8 +928,10 @@
         body: JSON.stringify({ kysymys, asiakas: 'metsaranta-koti' })
       });
       const data = await vastaus.json();
+      kirjoittaa.remove();
       addMessage(data.vastaus, 'bot');
     } catch (virhe) {
+      kirjoittaa.remove();
       addMessage('Pahoittelut, jotain meni pieleen. Yritä hetken päästä uudelleen.', 'bot');
     }
   }
