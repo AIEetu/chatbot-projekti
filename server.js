@@ -13,6 +13,7 @@ app.use(express.static('public'));
 const avaimet = {
   'turun-lukko': process.env.OPENAI_API_KEY_TURUN_LUKKO,
   'auto-mauno': process.env.OPENAI_API_KEY_AUTO_MAUNO,
+'metsaranta-koti': process.env.OPENAI_API_KEY_METSARANTA,
 };
 
 const sheetsOsoitteet = {
