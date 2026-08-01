@@ -76,26 +76,15 @@
   .launcher.hidden { display: none; }
 
   /* ================= panel ================= */
+  html, body { height: 100%; }
   .panel {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    width: 392px;
-    max-width: calc(100vw - 24px);
-    height: 640px;
-    max-height: calc(100vh - 48px);
+    position: relative;
+    width: 100%;
+    height: 100%;
     background: var(--white);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 34px 80px rgba(31,42,55,0.28);
-    display: none;
+    display: flex;
     flex-direction: column;
     overflow: hidden;
-    z-index: 1000;
-  }
-
-  .panel.open {
-    display: flex;
-    animation: panelIn 0.35s cubic-bezier(.2,.9,.25,1);
   }
 
   @keyframes panelIn {
@@ -720,22 +709,12 @@
     .submit-btn:hover { background: var(--clay-deep); }
   }
 
-  @media (max-width: 420px) {
-    .panel { right: 8px; left: 8px; width: auto; bottom: 8px; height: calc(100vh - 88px); }
-    .launcher { right: 14px; bottom: 14px; }
-  }
+
 </style>
 </head>
 <body>
 
-<!-- ===== launcher ===== -->
-<button class="launcher" id="launcher" aria-label="Avaa keskustelu">
-  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-  </svg>
-</button>
-
-<!-- ===== panel ===== -->
+<!-- ===== panel (täyttää koko iframen) ===== -->
 <div class="panel" id="panel">
 
  <button class="close-btn" id="closeBtn" aria-label="Sulje">&times;</button>
@@ -970,18 +949,10 @@
 </div>
 
 <script>
-  // ---------- launcher / panel ----------
-  const launcher = document.getElementById('launcher');
-  const panel = document.getElementById('panel');
+  // ---------- sulkeminen: viestiään host-sivulle (widget.js piilottaa iframen) ----------
   const closeBtn = document.getElementById('closeBtn');
-
-  launcher.addEventListener('click', () => {
-    panel.classList.add('open');
-    launcher.classList.add('hidden');
-  });
   closeBtn.addEventListener('click', () => {
-    panel.classList.remove('open');
-    launcher.classList.remove('hidden');
+    window.parent.postMessage('sulje-chat', '*');
   });
 
   // ---------- views + alapalkki ----------
