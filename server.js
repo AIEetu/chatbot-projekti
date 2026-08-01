@@ -14,10 +14,12 @@ const avaimet = {
   'turun-lukko': process.env.OPENAI_API_KEY_TURUN_LUKKO,
   'auto-mauno': process.env.OPENAI_API_KEY_AUTO_MAUNO,
 'metsaranta-koti': process.env.OPENAI_API_KEY_METSARANTA,
+'kivijalka-koti': process.env.OPENAI_API_KEY_KIVIJALKA,
 };
 
 const sheetsOsoitteet = {
   'turun-lukko': process.env.GOOGLE_SHEETS_URL_TURUN_LUKKO,
+  'kivijalka-koti': process.env.GOOGLE_SHEETS_URL_KIVIJALKA,
 };
 
 // Reitti: antaa widgetille asiakkaan asetukset (nimi, värit, tervehdys)
