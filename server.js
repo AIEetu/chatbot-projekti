@@ -15,6 +15,7 @@ const avaimet = {
   'auto-mauno': process.env.OPENAI_API_KEY_AUTO_MAUNO,
 'metsaranta-koti': process.env.OPENAI_API_KEY_METSARANTA,
 'kivijalka-koti': process.env.OPENAI_API_KEY_KIVIJALKA,
+'metsapolkuelainklinikka': process.env.OPENAI_API_KEY_METSAELAIN_KLINIKKA
 };
 
 const sheetsOsoitteet = {
