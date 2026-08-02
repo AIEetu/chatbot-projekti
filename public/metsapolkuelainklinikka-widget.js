@@ -1,7 +1,7 @@
 (function () {
   const RENDER_OSOITE = 'https://chatbot-projekti.onrender.com';
-  const PAAVARI = '#067021';
-  const PAAVARI_TUMMA = '#065f2e';
+  const PAAVARI = '#2f6b52';
+  const PAAVARI_TUMMA = '#1d4432';
 
   // ---- kelluva launcher-nappi ----
   const nappi = document.createElement('button');
@@ -15,7 +15,7 @@
     border: none;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 12px 28px rgba(156,77,47,0.35);
+    box-shadow: 0 12px 28px rgba(29,68,50,0.35);
     z-index: 999999;
   `;
   nappi.innerHTML = `
@@ -27,19 +27,19 @@
   // pieni pulssirengas huomion herättämiseksi
   const rengas = document.createElement('style');
   rengas.textContent = `
-    @keyframes kivijalkaPulssi {
-      0% { box-shadow: 0 0 0 0 rgba(15, 100, 47, 0.5); }
-      80% { box-shadow: 0 0 0 14px rgba(193,101,63,0); }
-      100% { box-shadow: 0 0 0 14px rgba(193,101,63,0); }
+    @keyframes metsapolkuPulssi {
+      0% { box-shadow: 0 0 0 0 rgba(47,107,82,0.5); }
+      80% { box-shadow: 0 0 0 14px rgba(47,107,82,0); }
+      100% { box-shadow: 0 0 0 14px rgba(47,107,82,0); }
     }
   `;
   document.head.appendChild(rengas);
-  nappi.style.animation = 'kivijalkaPulssi 2.4s ease-out infinite';
+  nappi.style.animation = 'metsapolkuPulssi 2.4s ease-out infinite';
 
   // ---- iframe (paneeli), piilotettuna aluksi ----
   const ikkuna = document.createElement('iframe');
-  ikkuna.src = RENDER_OSOITE + '/kivijalka-panel.html';
-  ikkuna.title = 'Kivijalka Koti -keskustelu';
+  ikkuna.src = RENDER_OSOITE + '/metsapolkuelainklinikka-panel.html';
+  ikkuna.title = 'Metsäpolku Eläinklinikka -keskustelu';
   ikkuna.style.cssText = `
     position: fixed;
     bottom: 24px; right: 24px;
@@ -47,7 +47,7 @@
     height: 640px; max-height: calc(100vh - 48px);
     border: none;
     border-radius: 26px;
-    box-shadow: 0 34px 80px rgba(31,42,55,0.28);
+    box-shadow: 0 34px 80px rgba(23,36,32,0.28);
     display: none;
     z-index: 999999;
     background: #fff;
@@ -67,14 +67,12 @@
 
   nappi.addEventListener('click', avaaChat);
 
-  // Paneelin oma sulkemisnappi lähettää postMessage-viestin, jonka nappaamme tässä
   window.addEventListener('message', (event) => {
     if (event.data === 'sulje-chat') {
       suljeChat();
     }
   });
 
-  // Pienillä näytöillä (puhelimet) iframe täyttää koko ruudun kun se on auki
   function paivitaKoko() {
     if (window.innerWidth <= 480) {
       ikkuna.style.cssText += `
