@@ -38,6 +38,43 @@ app.get('/api/asetukset/:asiakas', (req, res) => {
 
 // Reitti: tallentaa tarjouspyynnön Google Sheetsiin
 app.post('/api/tarjous', async (req, res) => {
+  // ================================================================
+// LISÄYS server.js:ään — tapahtumaseuranta / analytiikka
+// Liitä tämä samaan tyyliin kuin /api/tarjous-reitti, esim. heti sen jälkeen.
+// ================================================================
+
+// Sama sheetsOsoitteet-objekti jota jo käytät /api/tarjous-reitissä,
+// mutta ANALYTIIKALLE OMA Apps Script -URL (eri taulukko/välilehti kuin lomakkeet).
+// Lisää tämä .env-tiedostoon:
+//   GOOGLE_SHEETS_ANALYTIIKKA_URL=https://script.google.com/macros/s/.../exec
+const analytiikkaSheetsUrl = process.env.GOOGLE_SHEETS_ANALYTIIKKA_URL;
+
+// Reitti: kirjaa yksittäisen käyttäjätapahtuman (chat avattu, nappi klikattu, jne.)
+app.post('/api/tapahtuma', async (req, res) => {
+  try {
+    const { asiakas, tapahtuma, lisatieto, istuntoId, sivu, aikaleima } = req.body;
+
+    if (!analytiikkaSheetsUrl) {
+      // Jos analytiikka-URL:ää ei ole vielä asetettu, ei kaadeta pyyntöä —
+      // vastataan vain hiljaa ok, jotta botin toiminta ei koskaan häiriinny.
+      return res.json({ status: 'ohitettu' });
+    }
+
+    // Ei odoteta Sheetsin vastausta pitkään - fire-and-forget-tyylisesti,
+    // jotta analytiikka ei koskaan hidasta käyttäjän kokemusta.
+    fetch(analytiikkaSheetsUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ asiakas, tapahtuma, lisatieto, istuntoId, sivu, aikaleima }),
+    }).catch(virhe => console.error('Analytiikan tallennus epäonnistui:', virhe));
+
+    res.json({ status: 'ok' });
+  } catch (virhe) {
+    console.error(virhe);
+    // Analytiikka ei koskaan saa palauttaa virhettä käyttäjälle asti
+    res.json({ status: 'virhe_ohitettu' });
+  }
+});
   try {
     const { asiakas, palvelu, nimi, puhelin, sahkoposti, osoite, postinumero, viesti } = req.body;
 
