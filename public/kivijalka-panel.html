@@ -76,15 +76,26 @@
   .launcher.hidden { display: none; }
 
   /* ================= panel ================= */
-  html, body { height: 100%; }
   .panel {
-    position: relative;
-    width: 100%;
-    height: 100%;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 392px;
+    max-width: calc(100vw - 24px);
+    height: 640px;
+    max-height: calc(100vh - 48px);
     background: var(--white);
-    display: flex;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 34px 80px rgba(31,42,55,0.28);
+    display: none;
     flex-direction: column;
     overflow: hidden;
+    z-index: 1000;
+  }
+
+  .panel.open {
+    display: flex;
+    animation: panelIn 0.35s cubic-bezier(.2,.9,.25,1);
   }
 
   @keyframes panelIn {
@@ -709,12 +720,22 @@
     .submit-btn:hover { background: var(--clay-deep); }
   }
 
-
+  @media (max-width: 420px) {
+    .panel { right: 8px; left: 8px; width: auto; bottom: 8px; height: calc(100vh - 88px); }
+    .launcher { right: 14px; bottom: 14px; }
+  }
 </style>
 </head>
 <body>
 
-<!-- ===== panel (täyttää koko iframen) ===== -->
+<!-- ===== launcher ===== -->
+<button class="launcher" id="launcher" aria-label="Avaa keskustelu">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+  </svg>
+</button>
+
+<!-- ===== panel ===== -->
 <div class="panel" id="panel">
 
  <button class="close-btn" id="closeBtn" aria-label="Sulje">&times;</button>
@@ -949,10 +970,46 @@
 </div>
 
 <script>
-  // ---------- sulkeminen: viestiään host-sivulle (widget.js piilottaa iframen) ----------
+  // ---------- tapahtumaseuranta (analytiikka) ----------
+  // Istunnon tunniste: sama arvo koko sivulatauksen ajan, jotta yhden käyttäjän
+  // tapahtumat voidaan yhdistää samaksi "poluksi" jälkikäteen.
+  const istuntoId = 'ist_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+
+  function kirjaaTapahtuma(tapahtuma, lisatieto) {
+    try {
+      fetch('/api/tapahtuma', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          asiakas: 'kivijalka-koti',
+          tapahtuma: tapahtuma,
+          lisatieto: lisatieto || '',
+          istuntoId: istuntoId,
+          sivu: window.location.href,
+          aikaleima: new Date().toISOString()
+        }),
+        // ei odoteta vastausta, ei saa koskaan estää tai hidastaa käyttöliittymää
+        keepalive: true
+      }).catch(() => {}); // hiljainen epäonnistuminen: analytiikka ei koskaan saa rikkoa bottia
+    } catch (e) {
+      // ei tehdä mitään - tapahtumaseuranta ei koskaan saa kaataa sivua
+    }
+  }
+
+  // ---------- launcher / panel ----------
+  const launcher = document.getElementById('launcher');
+  const panel = document.getElementById('panel');
   const closeBtn = document.getElementById('closeBtn');
+
+  launcher.addEventListener('click', () => {
+    panel.classList.add('open');
+    launcher.classList.add('hidden');
+    kirjaaTapahtuma('chat_avattu');
+  });
   closeBtn.addEventListener('click', () => {
-    window.parent.postMessage('sulje-chat', '*');
+    panel.classList.remove('open');
+    launcher.classList.remove('hidden');
+    kirjaaTapahtuma('chat_suljettu');
   });
 
   // ---------- views + alapalkki ----------
@@ -1009,6 +1066,7 @@
     btn.addEventListener('click', () => {
       const toiminto = btn.dataset.navaction;
       paivitaAlapalkki(toiminto);
+      kirjaaTapahtuma('alapalkki_klik', toiminto);
 
       if (toiminto === 'koti') {
         showView('view-home');
@@ -1097,6 +1155,8 @@
     chatMessages.appendChild(kirjoittaa);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
+    kirjaaTapahtuma('chat_kysymys', kysymys);
+
     try {
       const vastaus = await fetch('/api/chat', {
         method: 'POST',
@@ -1106,9 +1166,18 @@
       const data = await vastaus.json();
       kirjoittaa.remove();
       addMessage(data.vastaus, 'bot');
+
+      // Tunnistetaan karkeasti tilanteet, joissa botti ei löytänyt vastausta tiedoista —
+      // näiden kysymysten perusteella tiedot.txt-tiedostoa kannattaa täydentää.
+      const eiTietoaMerkit = ['en tiedä', 'en löydä', 'en osaa sanoa', 'ei ole tietoa', 'valitettavasti minulla ei ole'];
+      const vastausPieni = (data.vastaus || '').toLowerCase();
+      if (eiTietoaMerkit.some(merkki => vastausPieni.includes(merkki))) {
+        kirjaaTapahtuma('botti_ei_tiennyt', kysymys);
+      }
     } catch (virhe) {
       kirjoittaa.remove();
       addMessage('Pahoittelut, jotain meni pieleen. Yritä hetken päästä uudelleen.', 'bot');
+      kirjaaTapahtuma('api_virhe', kysymys);
     }
   }
 
@@ -1159,6 +1228,7 @@
     myyntivastaukset.aikataulu = null;
     myyntivastaukset.remontit = null;
     addMessage('Haluaisin myydä asuntoni.', 'user');
+    kirjaaTapahtuma('myyntikysely_aloitettu');
 
     setTimeout(() => {
       addMessage('Hienoa! Autan mielelläni — kysyn muutaman nopean kysymyksen, jotta osaan valmistella arviokäynnin oikein.', 'bot');
@@ -1167,6 +1237,7 @@
   }
 
   function kysyKotityyppi() {
+    kirjaaTapahtuma('myyntikysely_vaihe', 'kotityyppi');
     addMessage('Minkälainen kotisi on?', 'bot');
     naytaKyselyVaihtoehdot(
       ['🏢 Kerrostalo', '🏡 Omakotitalo', '🏘️ Rivitalo', '💬 Muu'],
@@ -1178,6 +1249,7 @@
   }
 
   function kysyKoko() {
+    kirjaaTapahtuma('myyntikysely_vaihe', 'koko');
     addMessage('Kuinka monta neliötä kotisi on suurin piirtein?', 'bot');
     naytaKyselyVaihtoehdot(
       ['Alle 40 m²', '40–70 m²', '70–100 m²', 'Yli 100 m²'],
@@ -1189,6 +1261,7 @@
   }
 
   function kysyRemontit() {
+    kirjaaTapahtuma('myyntikysely_vaihe', 'remontit');
     addMessage('Onko kotiisi tehty remontteja? Voit valita monta.', 'bot');
     naytaMonivalinta(
       ['🔨 Peruskorjaukset tekemättä', '🍽️ Keittiöremontti', '🚿 Putkiremontti', '💧 Salaojat ja sokkeli', '🚪 Ikkunat ja ovet', '🛁 Kylpyhuone', '🔥 Lämmönlähde vaihdettu', '💬 Muu'],
@@ -1200,6 +1273,7 @@
   }
 
   function kysyAikataulu() {
+    kirjaaTapahtuma('myyntikysely_vaihe', 'aikataulu');
     addMessage('Milloin toivoisit myyväsi?', 'bot');
     naytaKyselyVaihtoehdot(
       ['Heti', '1–3 kk sisällä', 'Myöhemmin tänä vuonna', 'Vain kartoitan tilannetta'],
@@ -1352,6 +1426,7 @@
 
       kontti.remove();
       addMessage(`${nimi} — ${puhelin}`, 'user');
+      kirjaaTapahtuma('myyntikysely_valmis', myyntivastaukset.tyyppi || '');
 
       const viesti = `Kotityyppi: ${myyntivastaukset.tyyppi || '-'}, Koko: ${myyntivastaukset.koko || '-'}, Remontit: ${myyntivastaukset.remontit || '-'}, Aikataulu: ${myyntivastaukset.aikataulu || '-'}`;
 
@@ -1386,6 +1461,7 @@
     ostovastaukset.ominaisuudet = null;
     ostovastaukset.aikataulu = null;
     addMessage('Etsin uutta kotia.', 'user');
+    kirjaaTapahtuma('ostokysely_aloitettu');
 
     setTimeout(() => {
       addMessage('Hienoa! Autan mielelläni löytämään juuri sinulle sopivan kodin. Kysyn muutaman nopean kysymyksen, jotta osaan ehdottaa oikeita kohteita.', 'bot');
@@ -1394,6 +1470,7 @@
   }
 
   function kysyBudjetti() {
+    kirjaaTapahtuma('ostokysely_vaihe', 'budjetti');
     addMessage('Mikä on suunnilleen budjettisi?', 'bot');
     naytaKyselyVaihtoehdot(
       ['Alle 250 000 €', '250 000–400 000 €', '400 000–600 000 €', 'Yli 600 000 €'],
@@ -1405,6 +1482,7 @@
   }
 
   function kysyOstoTyyppi() {
+    kirjaaTapahtuma('ostokysely_vaihe', 'tyyppi');
     addMessage('Millaista asuntoa etsit?', 'bot');
     naytaKyselyVaihtoehdot(
       ['🏢 Kerrostalo', '🏡 Omakotitalo', '🏘️ Rivi- tai paritalo'],
@@ -1416,6 +1494,7 @@
   }
 
   function kysyHuoneet() {
+    kirjaaTapahtuma('ostokysely_vaihe', 'huoneet');
     addMessage('Montako huonetta toivot?', 'bot');
     naytaKyselyVaihtoehdot(
       ['Yksiö', '2h', '3h', '4h+'],
@@ -1427,6 +1506,7 @@
   }
 
   function kysyOminaisuudet() {
+    kirjaaTapahtuma('ostokysely_vaihe', 'ominaisuudet');
     addMessage('Onko sinulla toivottuja ominaisuuksia? Voit valita monta.', 'bot');
     naytaMonivalinta(
       ['🌅 Parveke tai terassi', '🌊 Jokinäköala', '🛗 Hissi', '🚗 Autopaikka', '🧖 Sauna', '💬 Muu'],
@@ -1438,6 +1518,7 @@
   }
 
   function kysyOstoAikataulu() {
+    kirjaaTapahtuma('ostokysely_vaihe', 'aikataulu');
     addMessage('Millä aikataululla etsit?', 'bot');
     naytaKyselyVaihtoehdot(
       ['Etsin heti muuttovalmista', '1–3 kk sisällä', 'Katselen vielä, ei kiirettä'],
@@ -1464,8 +1545,10 @@
     const osuma = etsiSopivaKohde();
     if (osuma) {
       addMessage(`Löysin sinulle jo yhden mahdollisen osuman: ${osuma} vastaa hyvin toiveitasi!`, 'bot');
+      kirjaaTapahtuma('kohde_osuma', osuma);
     } else {
       addMessage('Nykyisistä kohteistamme ei löytynyt vielä täydellistä osumaa, mutta otamme toiveesi talteen ja ilmoitamme heti kun sopiva kohde tulee myyntiin.', 'bot');
+      kirjaaTapahtuma('kohde_osuma', 'ei_osumaa');
     }
     setTimeout(() => {
       addMessage('Jätä vielä yhteystietosi, niin olemme sinuun yhteydessä.', 'bot');
@@ -1502,6 +1585,7 @@
 
       kontti.remove();
       addMessage(`${nimi} — ${puhelin}`, 'user');
+      kirjaaTapahtuma('ostokysely_valmis', ostovastaukset.budjetti || '');
 
       const viesti = `Budjetti: ${ostovastaukset.budjetti || '-'}, Tyyppi: ${ostovastaukset.tyyppi || '-'}, Huoneet: ${ostovastaukset.huoneet || '-'}, Toiveet: ${ostovastaukset.ominaisuudet || '-'}, Aikataulu: ${ostovastaukset.aikataulu || '-'}`;
 
@@ -1545,6 +1629,7 @@
   document.querySelectorAll('.menu-item, .offer-cta').forEach(btn => {
     btn.addEventListener('click', () => {
       const action = btn.dataset.action;
+      kirjaaTapahtuma('valikko_klik', action || btn.textContent.trim());
       if (action === 'goto-kohteet') showView('view-kohteet');
       else if (action === 'open-contact') openContactModal();
       else if (action === 'chat') sendToChat(btn.dataset.text);
@@ -1571,6 +1656,7 @@
 
   contactForm.addEventListener('submit', e => {
     e.preventDefault();
+    kirjaaTapahtuma('yhteydenotto_laheva');
     alert('Kiitos viestistäsi! (demo — ei lähetä oikeasti mihinkään)');
     contactForm.reset();
     closeContactModal();
