@@ -76,15 +76,26 @@
   .launcher.hidden { display: none; }
 
   /* ================= panel ================= */
-  html, body { height: 100%; }
   .panel {
-    position: relative;
-    width: 100%;
-    height: 100%;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 392px;
+    max-width: calc(100vw - 24px);
+    height: 640px;
+    max-height: calc(100vh - 48px);
     background: var(--white);
-    display: flex;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 34px 80px rgba(31,42,55,0.28);
+    display: none;
     flex-direction: column;
     overflow: hidden;
+    z-index: 1000;
+  }
+
+  .panel.open {
+    display: flex;
+    animation: panelIn 0.35s cubic-bezier(.2,.9,.25,1);
   }
 
   @keyframes panelIn {
@@ -709,11 +720,22 @@
     .submit-btn:hover { background: var(--clay-deep); }
   }
 
+  @media (max-width: 420px) {
+    .panel { right: 8px; left: 8px; width: auto; bottom: 8px; height: calc(100vh - 88px); }
+    .launcher { right: 14px; bottom: 14px; }
+  }
 </style>
 </head>
 <body>
 
-<!-- ===== panel (täyttää koko iframen) ===== -->
+<!-- ===== launcher ===== -->
+<button class="launcher" id="launcher" aria-label="Avaa keskustelu">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+  </svg>
+</button>
+
+<!-- ===== panel ===== -->
 <div class="panel" id="panel">
 
  <button class="close-btn" id="closeBtn" aria-label="Sulje">&times;</button>
@@ -936,10 +958,10 @@
       <h2 class="display">Jätä yhteydenottopyyntö</h2>
       <p class="sub">Vastaamme sinulle mahdollisimman pian.</p>
       <form id="contactForm">
-        <textarea class="form-field" placeholder="Viesti *" required></textarea>
-        <input class="form-field" type="text" placeholder="Nimi">
-        <input class="form-field" type="email" placeholder="Sähköposti *" required>
-        <input class="form-field" type="tel" placeholder="Puhelinnumero">
+        <textarea class="form-field" id="contact-viesti" placeholder="Viesti *" required></textarea>
+        <input class="form-field" id="contact-nimi" type="text" placeholder="Nimi">
+        <input class="form-field" id="contact-sahkoposti" type="email" placeholder="Sähköposti *" required>
+        <input class="form-field" id="contact-puhelin" type="tel" placeholder="Puhelinnumero">
         <p class="consent-text">Klikkaamalla hyväksyt <a href="#" onclick="return false;">käyttöehdot</a></p>
         <button type="submit" class="submit-btn">Lähetä viesti</button>
       </form>
@@ -974,16 +996,21 @@
     }
   }
 
-  // ---------- sulkeminen: viestitään host-sivulle (widget.js piilottaa iframen) ----------
+  // ---------- launcher / panel ----------
+  const launcher = document.getElementById('launcher');
+  const panel = document.getElementById('panel');
   const closeBtn = document.getElementById('closeBtn');
+
+  launcher.addEventListener('click', () => {
+    panel.classList.add('open');
+    launcher.classList.add('hidden');
+    kirjaaTapahtuma('chat_avattu');
+  });
   closeBtn.addEventListener('click', () => {
-    window.parent.postMessage('sulje-chat', '*');
+    panel.classList.remove('open');
+    launcher.classList.remove('hidden');
     kirjaaTapahtuma('chat_suljettu');
   });
-
-  // Kirjataan "chat_avattu" heti kun paneeli (iframe) latautuu, koska
-  // ulkoinen launcher-nappi (host-sivulla) avaa iframen, ei tämä sivu itse
-  kirjaaTapahtuma('chat_avattu');
 
   // ---------- views + alapalkki ----------
   const views = document.querySelectorAll('.view');
@@ -1147,11 +1174,94 @@
       if (eiTietoaMerkit.some(merkki => vastausPieni.includes(merkki))) {
         kirjaaTapahtuma('botti_ei_tiennyt', kysymys);
       }
+
+      // Tunnistetaan, jos asiakas vaikuttaa haluavan jättää yhteystietonsa vapaassa chatissa.
+      // Botti EI koskaan näytä lomaketta suoraan — se aina varmistaa ensin kysymällä.
+      if (tunnistaYhteystietoToive(kysymys)) {
+        setTimeout(() => kysyHalutaankoYhteystietolomake(kysymys), 500);
+      }
     } catch (virhe) {
       kirjoittaa.remove();
       addMessage('Pahoittelut, jotain meni pieleen. Yritä hetken päästä uudelleen.', 'bot');
       kirjaaTapahtuma('api_virhe', kysymys);
     }
+  }
+
+  // Yksinkertainen avainsanatunnistus: onko viestissä viitteitä halusta jättää yhteystiedot
+  function tunnistaYhteystietoToive(teksti) {
+    const t = teksti.toLowerCase();
+    const merkit = [
+      'yhteystied', 'ota yhteyt', 'ottakaa yhteyt', 'soittakaa', 'soita minulle',
+      'voisitteko soittaa', 'haluan yhteydenoton', 'jätän yhteystiedot',
+      'voitteko ottaa yhteyttä', 'haluaisin että soitatte', 'laittakaa viestiä',
+      'ottaisitteko yhteyttä', 'yhteydenotto'
+    ];
+    return merkit.some(m => t.includes(m));
+  }
+
+  // Kysyy AINA ensin varmistuksen, ennen kuin näyttää yhteystietolomakkeen
+  function kysyHalutaankoYhteystietolomake(alkuperainenKysymys) {
+    addMessage('Haluaisitko, että jätät yhteystietosi tähän, niin olemme sinuun yhteydessä?', 'bot');
+    naytaKyselyVaihtoehdot(
+      ['✅ Kyllä, jätän yhteystiedot', '❌ Ei kiitos'],
+      (vastaus) => {
+        if (vastaus.includes('Kyllä')) {
+          setTimeout(() => naytaVapaanChatinYhteystietolomake(alkuperainenKysymys), 300);
+        } else {
+          setTimeout(() => addMessage('Selvä! Autan mielelläni, jos jokin muu askarruttaa.', 'bot'), 300);
+        }
+      }
+    );
+  }
+
+  function naytaVapaanChatinYhteystietolomake(alkuperainenKysymys) {
+    const kontti = document.createElement('div');
+    kontti.className = 'kysely-vaihtoehdot';
+    kontti.style.flexDirection = 'column';
+    kontti.style.width = '100%';
+    kontti.style.gap = '10px';
+
+    kontti.innerHTML = `
+      <input class="form-field" type="text" id="vapaachat-nimi" placeholder="Nimi" style="margin:0;">
+      <input class="form-field" type="tel" id="vapaachat-puhelin" placeholder="Puhelinnumero" style="margin:0;">
+      <input class="form-field" type="email" id="vapaachat-sahkoposti" placeholder="Sähköposti" style="margin:0;">
+      <button class="offer-cta" id="vapaachat-laheta" style="width:100%;">Lähetä yhteystiedot</button>
+    `;
+
+    chatMessages.appendChild(kontti);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    document.getElementById('vapaachat-laheta').addEventListener('click', async () => {
+      const nimi = document.getElementById('vapaachat-nimi').value.trim();
+      const puhelin = document.getElementById('vapaachat-puhelin').value.trim();
+      const sahkoposti = document.getElementById('vapaachat-sahkoposti').value.trim();
+
+      if (!nimi || !puhelin) {
+        alert('Täytä ainakin nimi ja puhelinnumero.');
+        return;
+      }
+
+      kontti.remove();
+      addMessage(`${nimi} — ${puhelin}`, 'user');
+      kirjaaTapahtuma('yhteydenotto_laheva', 'vapaa_chat');
+
+      try {
+        await fetch('/api/tarjous', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            asiakas: 'kivijalka-koti',
+            palvelu: 'Yhteydenotto (vapaa chat)',
+            nimi, puhelin, sahkoposti,
+            viesti: alkuperainenKysymys
+          })
+        });
+      } catch (virhe) {
+        console.error('Tallennus epäonnistui', virhe);
+      }
+
+      addMessage('Kiitos! Olemme sinuun yhteydessä mahdollisimman pian.', 'bot');
+    });
   }
 
   function sendToChat(text) {
@@ -1627,10 +1737,37 @@
   document.getElementById('closeModal').addEventListener('click', closeContactModal);
   contactModal.addEventListener('click', e => { if (e.target === contactModal) closeContactModal(); });
 
-  contactForm.addEventListener('submit', e => {
+  contactForm.addEventListener('submit', async e => {
     e.preventDefault();
+
+    const viesti = document.getElementById('contact-viesti').value.trim();
+    const nimi = document.getElementById('contact-nimi').value.trim();
+    const sahkoposti = document.getElementById('contact-sahkoposti').value.trim();
+    const puhelin = document.getElementById('contact-puhelin').value.trim();
+
+    if (!viesti || !sahkoposti) {
+      alert('Täytä ainakin viesti ja sähköposti.');
+      return;
+    }
+
     kirjaaTapahtuma('yhteydenotto_laheva');
-    alert('Kiitos viestistäsi! (demo — ei lähetä oikeasti mihinkään)');
+
+    try {
+      await fetch('/api/tarjous', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          asiakas: 'kivijalka-koti',
+          palvelu: 'Suora yhteydenotto (Viestit / Ota yhteyttä)',
+          nimi, puhelin, sahkoposti,
+          viesti
+        })
+      });
+    } catch (virhe) {
+      console.error('Tallennus epäonnistui', virhe);
+    }
+
+    alert('Kiitos viestistäsi! Olemme sinuun yhteydessä mahdollisimman pian.');
     contactForm.reset();
     closeContactModal();
   });
