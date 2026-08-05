@@ -1160,7 +1160,7 @@
     kirjoittaa.className = 'typing-indicator';
     kirjoittaa.innerHTML = '<span></span><span></span><span></span>';
     chatMessages.appendChild(kirjoittaa);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    panelScroll.scrollTop = panelScroll.scrollHeight;
 
     kirjaaTapahtuma('chat_kysymys', kysymys);
 
