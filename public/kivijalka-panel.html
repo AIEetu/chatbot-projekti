@@ -682,34 +682,6 @@
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
   }
-  @keyframes modalLaskeutuu {
-    from { transform: translateY(0); }
-    to { transform: translateY(100%); }
-  }
-  .modal-sheet.sulkeutuu {
-    animation: modalLaskeutuu 0.32s cubic-bezier(.4,0,.6,1) forwards;
-  }
-  .modal-onnistui {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 70px 30px;
-    min-height: 320px;
-  }
-  .modal-onnistui .ikoni {
-    width: 56px; height: 56px;
-    border-radius: 50%;
-    background: var(--clay);
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 18px;
-  }
-  .modal-onnistui .ikoni svg { width: 26px; height: 26px; stroke: var(--white); }
-  .modal-onnistui p {
-    font-size: 16px; font-weight: 600; color: var(--navy);
-    max-width: 260px; line-height: 1.4;
-  }
   .modal-head { display: flex; justify-content: flex-end; padding: 14px 16px 0; }
   .modal-head button {
     background: var(--cream); border: none; width: 32px; height: 32px; border-radius: 50%;
@@ -954,7 +926,7 @@
 
 <!-- ===== contact modal ===== -->
 <div class="modal-overlay" id="contactModal">
-   <div class="modal-sheet" id="modalSheet">
+  <div class="modal-sheet">
     <div class="modal-head">
       <button id="closeModal" aria-label="Sulje">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
@@ -971,14 +943,6 @@
         <p class="consent-text">Klikkaamalla hyväksyt <a href="#" onclick="return false;">käyttöehdot</a></p>
         <button type="submit" class="submit-btn">Lähetä viesti</button>
       </form>
-      </form>
-
-      <div class="modal-onnistui" id="modalOnnistui">
-        <span class="ikoni">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-        </span>
-        <p>Kiitos, otamme teihin mahdollisimman pian yhteyttä!</p>
-      </div>
     </div>
   </div>
 </div>
@@ -1147,7 +1111,7 @@
     rivi.appendChild(el);
     rivi.appendChild(aika);
     chatMessages.appendChild(rivi);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    panelScroll.scrollTop = panelScroll.scrollHeight;
   }
 
   function clearOptionBubbles() {
@@ -1236,7 +1200,7 @@
     `;
 
     chatMessages.appendChild(kontti);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    panelScroll.scrollTop = panelScroll.scrollHeight;
 
     document.getElementById('vapaachat-laheta').addEventListener('click', async () => {
       const nimi = document.getElementById('vapaachat-nimi').value.trim();
@@ -1307,7 +1271,7 @@
     });
 
     chatMessages.appendChild(kontti);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    panelScroll.scrollTop = panelScroll.scrollHeight;
   }
 
   function aloitaMyyntikysely() {
@@ -1482,7 +1446,7 @@
     kontti.appendChild(jatkaNappi);
 
     chatMessages.appendChild(kontti);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    panelScroll.scrollTop = panelScroll.scrollHeight;
   }
 
   function naytaMyyntilomake() {
@@ -1501,7 +1465,7 @@
     `;
 
     chatMessages.appendChild(kontti);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    panelScroll.scrollTop = panelScroll.scrollHeight;
 
     document.getElementById('myynti-laheta').addEventListener('click', async () => {
       const nimi = document.getElementById('myynti-nimi').value.trim();
@@ -1661,7 +1625,7 @@
     `;
 
     chatMessages.appendChild(kontti);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    panelScroll.scrollTop = panelScroll.scrollHeight;
 
     document.getElementById('osto-laheta').addEventListener('click', async () => {
       const nimi = document.getElementById('osto-nimi').value.trim();
@@ -1774,19 +1738,9 @@
       console.error('Tallennus epäonnistui', virhe);
     }
 
-    contactForm.style.display = 'none';
-    document.getElementById('modalOnnistui').style.display = 'flex';
-
-    setTimeout(() => {
-      document.getElementById('modalSheet').classList.add('sulkeutuu');
-      setTimeout(() => {
-        closeContactModal();
-        document.getElementById('modalSheet').classList.remove('sulkeutuu');
-        document.getElementById('modalOnnistui').style.display = 'none';
-        contactForm.style.display = '';
-        contactForm.reset();
-      }, 320);
-    }, 3000);
+    alert('Kiitos viestistäsi! Olemme sinuun yhteydessä mahdollisimman pian.');
+    contactForm.reset();
+    closeContactModal();
   });
 
   // ---------- "pop"-klikkausefekti kaikkiin napeihin ja pikavalintoihin ----------
