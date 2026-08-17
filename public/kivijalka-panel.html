@@ -599,6 +599,45 @@
     0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
     30% { transform: translateY(-5px); opacity: 1; }
   }
+  /* ---- palaute (asiakastyytyväisyys) ---- */
+  .palaute-rivi {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: -4px;
+    padding-left: 2px;
+    animation: msgIn 0.3s cubic-bezier(.2,.8,.3,1) both;
+  }
+  .palaute-rivi span { font-size: 11.5px; color: #8a8378; }
+  .palaute-nappi {
+    background: var(--cream); border: 1px solid var(--stone);
+    width: 26px; height: 26px; border-radius: 50%;
+    font-size: 12px; cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .palaute-nappi:hover { background: var(--stone); }
+  }
+  .palaute-kiitos {
+    font-size: 11.5px; color: var(--clay-deep); font-weight: 600;
+  }
+  /* ---- lomakkeen jälkeinen tähtipalaute ---- */
+  .tahtipalaute {
+    margin-top: 10px;
+    animation: msgIn 0.3s cubic-bezier(.2,.8,.3,1) both;
+  }
+  .tahtipalaute-otsikko {
+    font-size: 13px; color: var(--navy); font-weight: 600; margin-bottom: 10px;
+  }
+  .tahtirivi {
+    display: flex; gap: 6px; margin-bottom: 12px;
+  }
+  .tahti-nappi {
+    background: none; border: none; font-size: 26px; line-height: 1;
+    cursor: pointer; padding: 0; color: var(--stone);
+    transition: transform 0.1s ease;
+  }
+  .tahti-nappi.aktiivinen { color: var(--clay); }
+  .tahti-nappi:active { transform: scale(1.15); }
 
   .option-bubble {
     align-self: flex-start;
@@ -1175,6 +1214,7 @@
       const data = await vastaus.json();
       kirjoittaa.remove();
       addMessage(data.vastaus, 'bot');
+      naytaPalauteKysymys(kysymys);
 
       // Tunnistetaan karkeasti tilanteet, joissa botti ei löytänyt vastausta tiedoista —
       // näiden kysymysten perusteella tiedot.txt-tiedostoa kannattaa täydentää.
@@ -1206,6 +1246,76 @@
       'ottaisitteko yhteyttä', 'yhteydenotto'
     ];
     return merkit.some(m => t.includes(m));
+  }
+  // Näyttää pienen 👍/👎-palautekysymyksen bottivastauksen alle
+  function naytaPalauteKysymys(kysymys) {
+    const rivi = document.createElement('div');
+    rivi.className = 'palaute-rivi';
+    rivi.innerHTML = `
+      <span>Oliko tästä apua?</span>
+      <button type="button" class="palaute-nappi" data-arvo="positiivinen">👍</button>
+      <button type="button" class="palaute-nappi" data-arvo="negatiivinen">👎</button>
+    `;
+
+    rivi.querySelectorAll('.palaute-nappi').forEach(nappi => {
+      nappi.addEventListener('click', () => {
+        const arvo = nappi.dataset.arvo;
+        kirjaaTapahtuma('palaute', `${arvo}: ${kysymys}`);
+        rivi.innerHTML = `<span class="palaute-kiitos">${arvo === 'positiivinen' ? '✅ Kiitos palautteesta!' : '📝 Kiitos, otamme tämän huomioon.'}</span>`;
+      });
+    });
+
+    chatMessages.appendChild(rivi);
+    panelScroll.scrollTop = panelScroll.scrollHeight;
+  }
+  // Lomakkeen jälkeinen tähtipalaute (1-5) + vapaaehtoinen kommentti
+  function naytaTahtipalaute(konteksti) {
+    const kontti = document.createElement('div');
+    kontti.className = 'kysely-vaihtoehdot tahtipalaute';
+    kontti.style.flexDirection = 'column';
+    kontti.style.width = '100%';
+
+    let valitutTahdet = 0;
+
+    kontti.innerHTML = `
+      <div class="tahtipalaute-otsikko">Kuinka koit tämän keskustelun?</div>
+      <div class="tahtirivi">
+        <button type="button" class="tahti-nappi" data-arvo="1">★</button>
+        <button type="button" class="tahti-nappi" data-arvo="2">★</button>
+        <button type="button" class="tahti-nappi" data-arvo="3">★</button>
+        <button type="button" class="tahti-nappi" data-arvo="4">★</button>
+        <button type="button" class="tahti-nappi" data-arvo="5">★</button>
+      </div>
+      <input class="form-field" id="palaute-kommentti" type="text" placeholder="Kommentti (valinnainen)" style="margin:0 0 10px;">
+      <button class="offer-cta" id="palaute-laheta" style="width:100%;">Lähetä palaute</button>
+    `;
+
+    const tahtiNapit = kontti.querySelectorAll('.tahti-nappi');
+    tahtiNapit.forEach(nappi => {
+      nappi.addEventListener('click', () => {
+        valitutTahdet = parseInt(nappi.dataset.arvo, 10);
+        tahtiNapit.forEach(n => {
+          n.classList.toggle('aktiivinen', parseInt(n.dataset.arvo, 10) <= valitutTahdet);
+        });
+      });
+    });
+
+    kontti.querySelector('#palaute-laheta').addEventListener('click', () => {
+      const kommentti = kontti.querySelector('#palaute-kommentti').value.trim();
+
+      if (valitutTahdet === 0) {
+        alert('Valitse ainakin yksi tähti.');
+        return;
+      }
+
+      kirjaaTapahtuma('tahtipalaute', `${konteksti}: ${valitutTahdet} tähteä${kommentti ? ' - ' + kommentti : ''}`);
+
+      kontti.remove();
+      addMessage('Kiitos palautteestasi! 💛', 'bot');
+    });
+
+    chatMessages.appendChild(kontti);
+    panelScroll.scrollTop = panelScroll.scrollHeight;
   }
 
   // Kysyy AINA ensin varmistuksen, ennen kuin näyttää yhteystietolomakkeen
@@ -1645,8 +1755,8 @@
         console.error('Tallennus epäonnistui', virhe);
       }
 
-      addMessage('Kiitos! Olemme sinuun yhteydessä pian ja sovimme arviokäynnin ajankohdan.', 'bot');
-    });
+addMessage('Kiitos! Olemme sinuun yhteydessä pian ja sovimme arviokäynnin ajankohdan.', 'bot');
+      setTimeout(() => naytaTahtipalaute('myyntikysely'), 700);    });
   }
 
   // ---------- ohjattu "Löydä uusi asunto" -kysely ----------
@@ -1804,8 +1914,8 @@
         console.error('Tallennus epäonnistui', virhe);
       }
 
-      addMessage('Kiitos! Otamme yhteyttä heti kun löydämme sopivan kohteen, tai kutsumme sinut näyttöön jompaan kumpaan nykyisistä kohteistamme.', 'bot');
-    });
+addMessage('Kiitos! Otamme yhteyttä heti kun löydämme sopivan kohteen, tai kutsumme sinut näyttöön jompaan kumpaan nykyisistä kohteistamme.', 'bot');
+      setTimeout(() => naytaTahtipalaute('ostokysely'), 700);    });
   }
 
   document.querySelectorAll('.option-bubble').forEach(btn => {
