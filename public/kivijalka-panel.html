@@ -16,6 +16,7 @@
     --cream: #faf5ee;
     --stone: #e9ddce;
     --white: #ffffff;
+    --pinta: #ffffff;
     --radius-lg: 26px;
     --radius-md: 16px;
   }
@@ -24,7 +25,7 @@
     --ink: #EDE7DD;
     --cream: #242A26;
     --stone: #3A433D;
-    --white: #171B18;
+    --pinta: #171B18;
   }
   body.tumma-tila .offer-illustration svg rect[fill="#e9ddce"],
   body.tumma-tila .valikko-radio::after { background: var(--clay); }
@@ -90,7 +91,7 @@
     position: relative;
     width: 100%;
     height: 100%;
-    background: var(--white);
+    background: var(--pinta);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -240,7 +241,7 @@
 
   /* ---- body ---- */
   .panel-body {
-    background: var(--white);
+    background: var(--pinta);
     padding-top: 26px;
   }
 
@@ -277,7 +278,7 @@
     transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
   }
   @media (hover: hover) and (pointer: fine) {
-    .menu-item:hover { transform: translateX(3px); border-color: var(--clay); background: var(--white); }
+    .menu-item:hover { transform: translateX(3px); border-color: var(--clay); background: var(--pinta); }
   }
 
   .menu-item .m-icon {
@@ -298,7 +299,7 @@
     margin: 4px 16px 18px;
     border-radius: var(--radius-md);
     overflow: hidden;
-    background: var(--white);
+    background: var(--pinta);
     border: 1px solid var(--stone);
     box-shadow: 0 10px 26px rgba(156,77,47,0.12);
     animation: offerIn 0.5s cubic-bezier(.22,.9,.32,1.1) 0.15s both;
@@ -512,7 +513,7 @@
     position: sticky;
     top: 0;
     z-index: 8;
-    background: var(--white);
+    background: var(--pinta);
     padding-top: 14px;
     will-change: transform;
   }
@@ -524,7 +525,7 @@
   .project-card {
     border-radius: var(--radius-md);
     overflow: hidden;
-    background: var(--white);
+    background: var(--pinta);
     border: 1px solid var(--stone);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
@@ -539,7 +540,7 @@
   }
   .project-card .tag {
     position: absolute; top: 10px; left: 10px;
-    background: var(--white);
+    background: var(--pinta);
     color: var(--clay-deep);
     font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
     padding: 4px 10px; border-radius: 999px;
@@ -665,7 +666,7 @@
   .option-bubble {
     align-self: flex-start;
     max-width: 94%;
-    background: var(--white);
+    background: var(--pinta);
     border: 1.5px solid var(--clay);
     color: var(--clay-deep);
     border-radius: 999px;
@@ -748,7 +749,7 @@
   .chat-input-row {
     display: none; gap: 8px; padding: 14px 16px;
     border-top: 1px solid var(--stone);
-    background: var(--white); flex-shrink: 0;
+    background: var(--pinta); flex-shrink: 0;
   }
   .chat-input-row.active { display: flex; }
   .chat-input-row input {
@@ -774,7 +775,7 @@
   }
   .modal-overlay.open { display: flex; }
   .modal-sheet {
-    background: var(--white); width: 100%; max-width: 420px;
+    background: var(--pinta); width: 100%; max-width: 420px;
     border-radius: 24px 24px 0 0; max-height: 88vh; overflow-y: auto;
     animation: modalNousu 0.32s cubic-bezier(.22,.9,.3,1.05);
   }
