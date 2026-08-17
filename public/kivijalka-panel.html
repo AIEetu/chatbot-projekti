@@ -19,6 +19,15 @@
     --radius-lg: 26px;
     --radius-md: 16px;
   }
+  /* ---- pimeä tila: samat muuttujat, vaihdetut arvot ---- */
+  body.tumma-tila {
+    --ink: #EDE7DD;
+    --cream: #242A26;
+    --stone: #3A433D;
+    --white: #171B18;
+  }
+  body.tumma-tila .offer-illustration svg rect[fill="#e9ddce"],
+  body.tumma-tila .valikko-radio::after { background: var(--clay); }
 
   * { box-sizing: border-box; }
 
@@ -150,6 +159,20 @@
     box-shadow: 0 4px 12px rgba(31,42,55,0.3);
     transition: background 0.15s ease, transform 0.15s ease;
   }
+  .teema-nappi {
+    position: absolute;
+    top: 16px;
+    right: 60px;
+    z-index: 20;
+    background: var(--navy);
+    border: none;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(31,42,55,0.3);
+  }
+  .teema-nappi svg { width: 16px; height: 16px; }
   @media (hover: hover) and (pointer: fine) {
     .close-btn:hover { background: var(--clay-deep); transform: scale(1.05); }
   }
@@ -792,6 +815,9 @@
 
 <!-- ===== panel (täyttää koko iframen) ===== -->
 <div class="panel" id="panel">
+  <button class="teema-nappi" id="teemaNappi" aria-label="Vaihda tumma/vaalea tila">
+   <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 3a9 9 0 000 18 9 9 0 010-18z" fill="white"/></svg>
+ </button>
 
  <button class="close-btn" id="closeBtn" aria-label="Sulje">&times;</button>
 
@@ -1053,6 +1079,17 @@
 
   // ---------- sulkeminen: viestitään host-sivulle (widget.js piilottaa iframen) ----------
   const closeBtn = document.getElementById('closeBtn');
+  // ---------- pimeä/vaalea tila ----------
+  const teemaNappi = document.getElementById('teemaNappi');
+  if (localStorage.getItem('kivijalka-teema') === 'tumma') {
+    document.body.classList.add('tumma-tila');
+  }
+  teemaNappi.addEventListener('click', () => {
+    document.body.classList.toggle('tumma-tila');
+    const nykyinen = document.body.classList.contains('tumma-tila') ? 'tumma' : 'vaalea';
+    localStorage.setItem('kivijalka-teema', nykyinen);
+    kirjaaTapahtuma('teema_vaihdettu', nykyinen);
+  });
   closeBtn.addEventListener('click', () => {
     window.parent.postMessage('sulje-chat', '*');
     kirjaaTapahtuma('chat_suljettu');
