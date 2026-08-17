@@ -639,6 +639,44 @@
   }
 
   .kysely-vaihtoehdot {
+  /* ---- kalenteri (arviokäyntiajan valinta) ---- */
+  .kalenteri-otsikko {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 4px 10px;
+    font-weight: 700; font-size: 14px; color: var(--navy);
+  }
+  .kalenteri-nuoli {
+    background: var(--cream); border: 1px solid var(--stone);
+    width: 30px; height: 30px; border-radius: 50%;
+    font-size: 16px; color: var(--navy); cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .kalenteri-viikonpaivat {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 4px; margin-bottom: 4px;
+  }
+  .kalenteri-viikonpaivat span {
+    text-align: center; font-size: 11px; color: #8a8378; font-weight: 600;
+  }
+  .kalenteri-ruudukko {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+  .kalenteri-paiva {
+    aspect-ratio: 1; border-radius: 50%;
+    border: 1.5px solid transparent;
+    background: var(--cream);
+    font-family: inherit; font-size: 13px; color: var(--ink);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .kalenteri-paiva:not(.pois-kaytosta):hover { border-color: var(--clay); }
+  }
+  .kalenteri-paiva.pois-kaytosta {
+    color: #cfc7ba; cursor: not-allowed; background: none;
+  }
     display: flex; flex-wrap: wrap; gap: 8px;
     align-self: flex-start;
     max-width: 100%;
@@ -1325,8 +1363,107 @@
       }
     );
   }
+  // ---------- kalenteri: näyttö-/arviokäyntiajan valinta ----------
+  function naytaKalenteri(jatkoFn) {
+    const kontti = document.createElement('div');
+    kontti.className = 'kysely-vaihtoehdot';
+    kontti.style.flexDirection = 'column';
+    kontti.style.width = '100%';
 
-  function kysyAikataulu() {
+    let nykyinenKuukausi = new Date();
+    nykyinenKuukausi.setDate(1);
+
+    function piirraKalenteri() {
+      kontti.innerHTML = '';
+      const kuukaudet = ['Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kesäkuu','Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu'];
+
+      const otsikko = document.createElement('div');
+      otsikko.className = 'kalenteri-otsikko';
+      const edellinenNappi = document.createElement('button');
+      edellinenNappi.type = 'button';
+      edellinenNappi.className = 'kalenteri-nuoli';
+      edellinenNappi.innerHTML = '‹';
+      const seuraavaNappi = document.createElement('button');
+      seuraavaNappi.type = 'button';
+      seuraavaNappi.className = 'kalenteri-nuoli';
+      seuraavaNappi.innerHTML = '›';
+      const otsikkoTeksti = document.createElement('span');
+      otsikkoTeksti.textContent = `${kuukaudet[nykyinenKuukausi.getMonth()]} ${nykyinenKuukausi.getFullYear()}`;
+      otsikko.appendChild(edellinenNappi);
+      otsikko.appendChild(otsikkoTeksti);
+      otsikko.appendChild(seuraavaNappi);
+      kontti.appendChild(otsikko);
+
+      const viikonpaivat = document.createElement('div');
+      viikonpaivat.className = 'kalenteri-viikonpaivat';
+      ['Ma','Ti','Ke','To','Pe','La','Su'].forEach(vp => {
+        const el = document.createElement('span');
+        el.textContent = vp;
+        viikonpaivat.appendChild(el);
+      });
+      kontti.appendChild(viikonpaivat);
+
+      const ruudukko = document.createElement('div');
+      ruudukko.className = 'kalenteri-ruudukko';
+
+      const ekaPaiva = new Date(nykyinenKuukausi.getFullYear(), nykyinenKuukausi.getMonth(), 1);
+      let viikonpaivaIndeksi = ekaPaiva.getDay();
+      viikonpaivaIndeksi = viikonpaivaIndeksi === 0 ? 6 : viikonpaivaIndeksi - 1;
+      for (let i = 0; i < viikonpaivaIndeksi; i++) ruudukko.appendChild(document.createElement('span'));
+
+      const paivienMaara = new Date(nykyinenKuukausi.getFullYear(), nykyinenKuukausi.getMonth() + 1, 0).getDate();
+      const tanaan = new Date();
+      tanaan.setHours(0, 0, 0, 0);
+
+      for (let paiva = 1; paiva <= paivienMaara; paiva++) {
+        const pvm = new Date(nykyinenKuukausi.getFullYear(), nykyinenKuukausi.getMonth(), paiva);
+        const nappi = document.createElement('button');
+        nappi.type = 'button';
+        nappi.className = 'kalenteri-paiva';
+        nappi.textContent = paiva;
+
+        if (pvm < tanaan) {
+          nappi.disabled = true;
+          nappi.classList.add('pois-kaytosta');
+        } else {
+          nappi.addEventListener('click', () => {
+            kontti.remove();
+            const paivaTeksti = pvm.toLocaleDateString('fi-FI', { weekday: 'long', day: 'numeric', month: 'long' });
+            addMessage(paivaTeksti, 'user');
+            setTimeout(() => naytaAikaslotit(paivaTeksti, jatkoFn), 300);
+          });
+        }
+        ruudukko.appendChild(nappi);
+      }
+      kontti.appendChild(ruudukko);
+
+      edellinenNappi.addEventListener('click', () => {
+        nykyinenKuukausi.setMonth(nykyinenKuukausi.getMonth() - 1);
+        piirraKalenteri();
+      });
+      seuraavaNappi.addEventListener('click', () => {
+        nykyinenKuukausi.setMonth(nykyinenKuukausi.getMonth() + 1);
+        piirraKalenteri();
+      });
+    }
+
+    piirraKalenteri();
+    chatMessages.appendChild(kontti);
+    panelScroll.scrollTop = panelScroll.scrollHeight;
+  }
+
+  function naytaAikaslotit(paivaTeksti, jatkoFn) {
+    addMessage('Mihin aikaan sopisi parhaiten?', 'bot');
+    naytaKyselyVaihtoehdot(
+      ['9:00', '10:30', '12:00', '13:30', '15:00', '16:30'],
+      (aika) => {
+        kirjaaTapahtuma('kalenteriaika_valittu', `${paivaTeksti} klo ${aika}`);
+        jatkoFn(paivaTeksti, aika);
+      }
+    );
+  }
+
+ function kysyAikataulu() {
     kirjaaTapahtuma('myyntikysely_vaihe', 'aikataulu');
     addMessage('Milloin toivoisit myyväsi?', 'bot');
     naytaKyselyVaihtoehdot(
@@ -1334,8 +1471,17 @@
       (vastaus) => {
         myyntivastaukset.aikataulu = vastaus;
         setTimeout(() => {
-          addMessage('Kiitos! Jätä vielä yhteystietosi, niin varaamme sinulle sopivan ajan maksuttomaan arviokäyntiin.', 'bot');
-          setTimeout(naytaMyyntilomake, 400);
+          addMessage('Kiitos! Valitse vielä sinulle sopiva päivä maksuttomaan arviokäyntiin.', 'bot');
+          setTimeout(() => {
+            naytaKalenteri((paiva, aika) => {
+              myyntivastaukset.arviokayntiPaiva = paiva;
+              myyntivastaukset.arviokayntiAika = aika;
+              setTimeout(() => {
+                addMessage('Hienoa! Jätä vielä yhteystietosi, niin vahvistamme ajan.', 'bot');
+                setTimeout(naytaMyyntilomake, 400);
+              }, 300);
+            });
+          }, 400);
         }, 300);
       }
     );
@@ -1482,7 +1628,7 @@
       addMessage('✅ Yhteystiedot lähetetty', 'user');
       kirjaaTapahtuma('myyntikysely_valmis', myyntivastaukset.tyyppi || '');
 
-      const viesti = `Kotityyppi: ${myyntivastaukset.tyyppi || '-'}, Koko: ${myyntivastaukset.koko || '-'}, Remontit: ${myyntivastaukset.remontit || '-'}, Aikataulu: ${myyntivastaukset.aikataulu || '-'}`;
+      const viesti = `Kotityyppi: ${myyntivastaukset.tyyppi || '-'}, Koko: ${myyntivastaukset.koko || '-'}, Remontit: ${myyntivastaukset.remontit || '-'}, Aikataulu: ${myyntivastaukset.aikataulu || '-'}, Varattu aika: ${myyntivastaukset.arviokayntiPaiva || '-'} klo ${myyntivastaukset.arviokayntiAika || '-'}`;
 
       try {
         await fetch('/api/tarjous', {
