@@ -36,58 +36,55 @@ app.get('/api/asetukset/:asiakas', (req, res) => {
   res.json(asetukset);
 });
 
-// Reitti: tallentaa tarjouspyynnön Google Sheetsiin
+// Reitti: tallentaa tarjouspyynnön HubSpotiin
 app.post('/api/tarjous', async (req, res) => {
-  // ================================================================
-// LISÄYS server.js:ään — tapahtumaseuranta / analytiikka
-// Liitä tämä samaan tyyliin kuin /api/tarjous-reitti, esim. heti sen jälkeen.
-// ================================================================
-
-// Sama sheetsOsoitteet-objekti jota jo käytät /api/tarjous-reitissä,
-// mutta ANALYTIIKALLE OMA Apps Script -URL (eri taulukko/välilehti kuin lomakkeet).
-// Lisää tämä .env-tiedostoon:
-//   GOOGLE_SHEETS_ANALYTIIKKA_URL=https://script.google.com/macros/s/.../exec
-const analytiikkaSheetsUrl = process.env.GOOGLE_SHEETS_ANALYTIIKKA_URL;
-
-// Reitti: kirjaa yksittäisen käyttäjätapahtuman (chat avattu, nappi klikattu, jne.)
-app.post('/api/tapahtuma', async (req, res) => {
   try {
-    const { asiakas, tapahtuma, lisatieto, istuntoId, sivu, aikaleima } = req.body;
+    const { nimi, puhelin, sahkoposti, osoite, postinumero, viesti, palvelu } = req.body;
 
-    if (!analytiikkaSheetsUrl) {
-      // Jos analytiikka-URL:ää ei ole vielä asetettu, ei kaadeta pyyntöä —
-      // vastataan vain hiljaa ok, jotta botin toiminta ei koskaan häiriinny.
-      return res.json({ status: 'ohitettu' });
+    if (!sahkoposti) {
+      return res.status(400).json({ virhe: 'Sähköposti puuttuu, HubSpot vaatii sen kontaktin tunnisteeksi' });
     }
 
-    // Ei odoteta Sheetsin vastausta pitkään - fire-and-forget-tyylisesti,
-    // jotta analytiikka ei koskaan hidasta käyttäjän kokemusta.
-    fetch(analytiikkaSheetsUrl, {
+    const [etunimi, ...loput] = (nimi || '').split(' ');
+    const sukunimi = loput.join(' ');
+
+    const kontaktinTiedot = {
+      properties: {
+        email: sahkoposti,
+        firstname: etunimi || '',
+        lastname: sukunimi || '',
+        phone: puhelin || '',
+        address: osoite || '',
+        zip: postinumero || '',
+        viesti: viesti || '',
+        palvelu: palvelu || '',
+      },
+    };
+
+    const headers = {
+      'Authorization': `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+      'Content-Type': 'application/json',
+    };
+
+    // Yritetään ensin luoda uusi kontakti
+    const luontiVastaus = await fetch('https://api.hubapi.com/crm/v3/objects/contacts', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ asiakas, tapahtuma, lisatieto, istuntoId, sivu, aikaleima }),
-    }).catch(virhe => console.error('Analytiikan tallennus epäonnistui:', virhe));
-
-    res.json({ status: 'ok' });
-  } catch (virhe) {
-    console.error(virhe);
-    // Analytiikka ei koskaan saa palauttaa virhettä käyttäjälle asti
-    res.json({ status: 'virhe_ohitettu' });
-  }
-});
-  try {
-    const { asiakas, palvelu, nimi, puhelin, sahkoposti, osoite, postinumero, viesti } = req.body;
-
-    const sheetsUrl = sheetsOsoitteet[asiakas];
-    if (!sheetsUrl) {
-      return res.status(404).json({ virhe: 'Lomaketta ei ole määritelty tälle asiakkaalle' });
-    }
-
-   await fetch(sheetsUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ palvelu, nimi, puhelin, sahkoposti, osoite, postinumero, viesti }),
+      headers,
+      body: JSON.stringify(kontaktinTiedot),
     });
+
+    if (luontiVastaus.status === 409) {
+      // Kontakti on jo olemassa (sama sähköposti) → päivitetään sen tiedot
+      await fetch(`https://api.hubapi.com/crm/v3/objects/contacts/${encodeURIComponent(sahkoposti)}?idProperty=email`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify(kontaktinTiedot),
+      });
+    } else if (!luontiVastaus.ok) {
+      const virheteksti = await luontiVastaus.text();
+      console.error('HubSpot-virhe:', virheteksti);
+      return res.status(500).json({ virhe: 'HubSpot-tallennus epäonnistui' });
+    }
 
     res.json({ status: 'ok' });
   } catch (virhe) {
