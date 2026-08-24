@@ -1,4 +1,13 @@
 require('dotenv').config();
+const nodemailer = require('nodemailer');
+const asiakasAsetukset = {
+  'kivijalka-koti': {
+    yritysNimi: 'Kivijalka Koti',
+    gmailUser: process.env.GMAIL_USER_KIVIJALKA,
+    gmailAppPassword: process.env.GMAIL_APP_PASSWORD_KIVIJALKA,
+    asiakaspalveluSahkoposti: process.env.ASIAKASPALVELU_SAHKOPOSTI_KIVIJALKA,
+  },
+};
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
@@ -35,6 +44,42 @@ app.get('/api/asetukset/:asiakas', (req, res) => {
   const asetukset = JSON.parse(fs.readFileSync(asetuksetPolku, 'utf8'));
   res.json(asetukset);
 });
+async function laheteVahvistusEmail({ nimi, sahkoposti, viesti, asetukset }) {
+  if (!sahkoposti || sahkoposti.indexOf('@') === -1) return;
+  if (!asetukset.gmailUser || !asetukset.gmailAppPassword) {
+    console.error('Sähköpostitunnuksia ei ole asetettu tälle asiakkaalle.');
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: asetukset.gmailUser, pass: asetukset.gmailAppPassword },
+  });
+
+  const etunimi = (nimi || '').split(' ')[0] || '';
+  const tervehdys = etunimi ? `Hei ${etunimi},` : 'Hei,';
+  const yritysNimi = asetukset.yritysNimi;
+
+  const yhteenvetoRivit = (viesti || '')
+    .split(',').map(r => r.trim()).filter(r => r.length > 0)
+    .map(r => '– ' + r).join('\n');
+
+  const runko =
+    `${tervehdys}\n\nKiitos kun jätit yhteystietosi ${yritysNimi}lle!\n\n` +
+    (yhteenvetoRivit ? `Tässä mitä kerroit meille:\n${yhteenvetoRivit}\n\n` : '') +
+    `Olemme sinuun yhteydessä mahdollisimman pian.\n\n---\n` +
+    `Tämä on automaattinen sähköpostiviesti, ethän vastaa suoraan tähän viestiin.\n` +
+    `Jos sinulla on kysyttävää, otathan yhteyttä asiakaspalveluumme: ${asetukset.asiakaspalveluSahkoposti}\n\n` +
+    `Ystävällisin terveisin,\n${yritysNimi}`;
+
+  await transporter.sendMail({
+    from: `"${yritysNimi}" <${asetukset.gmailUser}>`,
+    to: sahkoposti,
+    subject: `Kiitos yhteydenotostasi${etunimi ? ', ' + etunimi : ''}!`,
+    text: runko,
+    replyTo: asetukset.asiakaspalveluSahkoposti,
+  });
+}
 
 // Reitti: tallentaa tarjouspyynnön HubSpotiin, omina kenttinään
 app.post('/api/tarjous', async (req, res) => {
@@ -93,6 +138,14 @@ app.post('/api/tarjous', async (req, res) => {
       const virheteksti = await luontiVastaus.text();
       console.error('HubSpot-virhe:', virheteksti);
       return res.status(500).json({ virhe: 'HubSpot-tallennus epäonnistui' });
+    }
+    const asetukset = asiakasAsetukset[req.body.asiakas];
+    if (asetukset) {
+      try {
+        await laheteVahvistusEmail({ nimi, sahkoposti, viesti, asetukset });
+      } catch (sposti_virhe) {
+        console.error('Vahvistussähköpostin lähetys epäonnistui:', sposti_virhe);
+      }
     }
 
     res.json({ status: 'ok' });
