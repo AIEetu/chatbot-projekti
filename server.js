@@ -36,10 +36,13 @@ app.get('/api/asetukset/:asiakas', (req, res) => {
   res.json(asetukset);
 });
 
-// Reitti: tallentaa tarjouspyynnön HubSpotiin
+// Reitti: tallentaa tarjouspyynnön HubSpotiin, omina kenttinään
 app.post('/api/tarjous', async (req, res) => {
   try {
-    const { nimi, puhelin, sahkoposti, osoite, postinumero, viesti, palvelu } = req.body;
+    const {
+      nimi, puhelin, sahkoposti, osoite, postinumero, viesti, palvelu,
+      kotityyppi, koko, remontit, budjetti, huoneet, ominaisuudet, aikataulu, varattuAika,
+    } = req.body;
 
     if (!sahkoposti) {
       return res.status(400).json({ virhe: 'Sähköposti puuttuu, HubSpot vaatii sen kontaktin tunnisteeksi' });
@@ -58,6 +61,14 @@ app.post('/api/tarjous', async (req, res) => {
         zip: postinumero || '',
         viesti: viesti || '',
         palvelu: palvelu || '',
+        kotityyppi: kotityyppi || '',
+        koko: koko || '',
+        remontit: remontit || '',
+        budjetti: budjetti || '',
+        huoneet: huoneet || '',
+        ominaisuudet: ominaisuudet || '',
+        aikataulu: aikataulu || '',
+        varattu_aika: varattuAika || '',
       },
     };
 
@@ -66,7 +77,6 @@ app.post('/api/tarjous', async (req, res) => {
       'Content-Type': 'application/json',
     };
 
-    // Yritetään ensin luoda uusi kontakti
     const luontiVastaus = await fetch('https://api.hubapi.com/crm/v3/objects/contacts', {
       method: 'POST',
       headers,
@@ -74,7 +84,6 @@ app.post('/api/tarjous', async (req, res) => {
     });
 
     if (luontiVastaus.status === 409) {
-      // Kontakti on jo olemassa (sama sähköposti) → päivitetään sen tiedot
       await fetch(`https://api.hubapi.com/crm/v3/objects/contacts/${encodeURIComponent(sahkoposti)}?idProperty=email`, {
         method: 'PATCH',
         headers,
