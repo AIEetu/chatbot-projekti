@@ -88,7 +88,6 @@ app.post('/api/tarjous', async (req, res) => {
       properties: {
         ...kontaktinTiedot.properties,
         hs_lead_status: 'NEW',
-        hubspot_owner_id: HUBSPOT_OMISTAJA_ID,
       },
     };
 
