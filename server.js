@@ -88,6 +88,7 @@ app.post('/api/tarjous', async (req, res) => {
       properties: {
         ...kontaktinTiedot.properties,
         hs_lead_status: 'NEW',
+        const uudenKontaktinTiedot = {
       },
     };
 
