@@ -2,15 +2,6 @@ const dns = require('dns');
 dns.setDefaultResultOrder('ipv4first');
 
 require('dotenv').config();
-const nodemailer = require('nodemailer');
-const asiakasAsetukset = {
-  'kivijalka-koti': {
-    yritysNimi: 'Kivijalka Koti',
-    gmailUser: process.env.GMAIL_USER_KIVIJALKA,
-    gmailAppPassword: process.env.GMAIL_APP_PASSWORD_KIVIJALKA,
-    asiakaspalveluSahkoposti: process.env.ASIAKASPALVELU_SAHKOPOSTI_KIVIJALKA,
-  },
-};
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
@@ -47,44 +38,8 @@ app.get('/api/asetukset/:asiakas', (req, res) => {
   const asetukset = JSON.parse(fs.readFileSync(asetuksetPolku, 'utf8'));
   res.json(asetukset);
 });
-async function laheteVahvistusEmail({ nimi, sahkoposti, viesti, asetukset }) {
-  if (!sahkoposti || sahkoposti.indexOf('@') === -1) return;
-  if (!asetukset.gmailUser || !asetukset.gmailAppPassword) {
-    console.error('Sähköpostitunnuksia ei ole asetettu tälle asiakkaalle.');
-    return;
-  }
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user: asetukset.gmailUser, pass: asetukset.gmailAppPassword },
-  });
-
-  const etunimi = (nimi || '').split(' ')[0] || '';
-  const tervehdys = etunimi ? `Hei ${etunimi},` : 'Hei,';
-  const yritysNimi = asetukset.yritysNimi;
-
-  const yhteenvetoRivit = (viesti || '')
-    .split(',').map(r => r.trim()).filter(r => r.length > 0)
-    .map(r => '– ' + r).join('\n');
-
-  const runko =
-    `${tervehdys}\n\nKiitos kun jätit yhteystietosi ${yritysNimi}lle!\n\n` +
-    (yhteenvetoRivit ? `Tässä mitä kerroit meille:\n${yhteenvetoRivit}\n\n` : '') +
-    `Olemme sinuun yhteydessä mahdollisimman pian.\n\n---\n` +
-    `Tämä on automaattinen sähköpostiviesti, ethän vastaa suoraan tähän viestiin.\n` +
-    `Jos sinulla on kysyttävää, otathan yhteyttä asiakaspalveluumme: ${asetukset.asiakaspalveluSahkoposti}\n\n` +
-    `Ystävällisin terveisin,\n${yritysNimi}`;
-
-  await transporter.sendMail({
-    from: `"${yritysNimi}" <${asetukset.gmailUser}>`,
-    to: sahkoposti,
-    subject: `Kiitos yhteydenotostasi${etunimi ? ', ' + etunimi : ''}!`,
-    text: runko,
-    replyTo: asetukset.asiakaspalveluSahkoposti,
-  });
-}
-
-// Reitti: tallentaa tarjouspyynnön HubSpotiin, omina kenttinään
+// Reitti: tallentaa tarjouspyynnön HubSpotiin (CRM) JA Google Sheetsiin (sähköpostivahvistusta varten)
 app.post('/api/tarjous', async (req, res) => {
   try {
     const {
@@ -93,12 +48,13 @@ app.post('/api/tarjous', async (req, res) => {
     } = req.body;
 
     if (!sahkoposti) {
-      return res.status(400).json({ virhe: 'Sähköposti puuttuu, HubSpot vaatii sen kontaktin tunnisteeksi' });
+      return res.status(400).json({ virhe: 'Sähköposti puuttuu' });
     }
 
     const [etunimi, ...loput] = (nimi || '').split(' ');
     const sukunimi = loput.join(' ');
 
+    // ---- 1) Tallennus HubSpotiin (CRM, kontaktit) ----
     const kontaktinTiedot = {
       properties: {
         email: sahkoposti,
@@ -126,29 +82,27 @@ app.post('/api/tarjous', async (req, res) => {
     };
 
     const luontiVastaus = await fetch('https://api.hubapi.com/crm/v3/objects/contacts', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(kontaktinTiedot),
+      method: 'POST', headers, body: JSON.stringify(kontaktinTiedot),
     });
 
     if (luontiVastaus.status === 409) {
       await fetch(`https://api.hubapi.com/crm/v3/objects/contacts/${encodeURIComponent(sahkoposti)}?idProperty=email`, {
-        method: 'PATCH',
-        headers,
-        body: JSON.stringify(kontaktinTiedot),
+        method: 'PATCH', headers, body: JSON.stringify(kontaktinTiedot),
       });
     } else if (!luontiVastaus.ok) {
-      const virheteksti = await luontiVastaus.text();
-      console.error('HubSpot-virhe:', virheteksti);
-      return res.status(500).json({ virhe: 'HubSpot-tallennus epäonnistui' });
+      console.error('HubSpot-virhe:', await luontiVastaus.text());
+      // Ei keskeytetä tähän — Sheets-tallennus/sähköposti yritetään silti
     }
-    const asetukset = asiakasAsetukset[req.body.asiakas];
-    if (asetukset) {
-      try {
-        await laheteVahvistusEmail({ nimi, sahkoposti, viesti, asetukset });
-      } catch (sposti_virhe) {
-        console.error('Vahvistussähköpostin lähetys epäonnistui:', sposti_virhe);
-      }
+
+    // ---- 2) Lähetys Google Sheetsin Apps Scriptiin (tallentaa Liidit-taulukkoon JA lähettää GmailApp-vahvistuksen) ----
+    try {
+      await fetch(process.env.GOOGLE_SHEETS_URL_KIVIJALKA, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nimi, puhelin, sahkoposti, osoite, postinumero, viesti, palvelu }),
+      });
+    } catch (sheets_virhe) {
+      console.error('Google Sheets -tallennus/sähköposti epäonnistui:', sheets_virhe);
     }
 
     res.json({ status: 'ok' });
