@@ -81,8 +81,18 @@ app.post('/api/tarjous', async (req, res) => {
       'Content-Type': 'application/json',
     };
 
+        // Uudelle kontaktille asetetaan HubSpotin oma "Liidin tila" -kenttä arvoon "Uusi" —
+    // päivityksessä (jo olemassa oleva kontakti) tätä EI kosketa, jotta myyjän itse
+    // tekemä tilamerkintä ei ylikirjoidu
+    const uudenKontaktinTiedot = {
+      properties: {
+        ...kontaktinTiedot.properties,
+        hs_lead_status: 'NEW',
+      },
+    };
+
     const luontiVastaus = await fetch('https://api.hubapi.com/crm/v3/objects/contacts', {
-      method: 'POST', headers, body: JSON.stringify(kontaktinTiedot),
+      method: 'POST', headers, body: JSON.stringify(uudenKontaktinTiedot),
     });
 
     if (luontiVastaus.status === 409) {
