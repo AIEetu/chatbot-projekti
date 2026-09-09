@@ -1003,7 +1003,8 @@
 
   // ---------- sulkeminen: viestitään host-sivulle (widget.js piilottaa iframen) ----------
   const closeBtn = document.getElementById('closeBtn');
-  closeBtn.addEventListener('click', () => {
+    closeBtn.addEventListener('click', () => {
+    suljeIhmisKeskustelu();
     window.parent.postMessage('sulje-chat', '*');
     kirjaaTapahtuma('chat_suljettu');
   });
@@ -1035,7 +1036,8 @@
     panelHero.classList.toggle('hero-hidden', id !== 'view-home');
 
     // Nollataan keskustelu, kun poistutaan chat-näkymästä
-        if (edellinenNakyma === 'view-chat' && id !== 'view-chat') {
+           if (edellinenNakyma === 'view-chat' && id !== 'view-chat') {
+      suljeIhmisKeskustelu();
       chatMessages.innerHTML = chatMessagesAlkutila;
       document.querySelectorAll('#chatMessages .option-bubble').forEach(btn => {
         if (btn.id === 'pyydaIhminenNappi') {
@@ -1109,6 +1111,19 @@
     clearOptionBubbles();
     addMessage('Pyydän hetken kärsivällisyyttä, yhdistän sinut asiakaspalveluumme...', 'bot');
     kirjaaTapahtuma('ihminen_pyydetty');
+      function suljeIhmisKeskustelu() {
+    if (!ihmisTila) return; // ei tehdä mitään jos live-chat ei ollut edes käynnissä
+    fetch('/api/live/sulje', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ asiakas: 'kivijalka-koti', istuntoId }),
+    }).catch(() => {});
+    ihmisTila = false;
+    if (livePollausInterval) {
+      clearInterval(livePollausInterval);
+      livePollausInterval = null;
+    }
+  }
 
     fetch('/api/live/pyynto', {
       method: 'POST',
