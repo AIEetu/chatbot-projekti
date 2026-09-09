@@ -651,6 +651,23 @@
     background: var(--white); flex-shrink: 0;
   }
   .chat-input-row.active { display: flex; }
+    .ihminen-linkkirivi {
+    display: none;
+    justify-content: center;
+    padding: 4px 16px 14px;
+    background: var(--white);
+    flex-shrink: 0;
+  }
+  .ihminen-linkkirivi.active { display: flex; }
+  .ihminen-linkkirivi button {
+    all: unset;
+    cursor: pointer;
+    color: var(--clay-deep);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-decoration: underline;
+  }
   .chat-input-row input {
     flex: 1; border: 1.5px solid var(--stone); border-radius: 999px;
     padding: 11px 16px; font-size: 16px; outline: none; font-family: inherit;
