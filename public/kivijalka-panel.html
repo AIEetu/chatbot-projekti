@@ -815,7 +815,6 @@
         <button class="option-bubble" data-text="Etsin omistusasuntoa keskustasta">Etsin omistusasuntoa keskustasta</button>
         <button class="option-bubble" data-text="Haluan varata arviokäynnin nykyiseen asuntooni">Haluan varata arviokäynnin</button>
         <button class="option-bubble" data-text="Haluan kuulla uusista kohteista ensimmäisenä">Haluan kuulla uusista kohteista ensimmäisenä</button>
-      <button class="option-bubble" id="pyydaIhminenNappi">🙋 Puhu ihmisen kanssa</button>
       </div>
     </div>
 
@@ -904,6 +903,19 @@
       <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
     </button>
   </div>
+    <div class="chat-input-row" id="chatInputRow">
+    <input type="text" id="chatInput" placeholder="Kirjoita viesti...">
+    <button id="sendBtn" aria-label="Lähetä">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+  </div>
+
+  <div class="ihminen-linkkirivi" id="ihminenLinkkiRivi">
+    <button type="button" id="pyydaIhminenNappi">🙋 Puhu ihmisen kanssa</button>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn active" data-navaction="koti">
 
   <div class="bottom-nav">
     <button class="nav-btn active" data-navaction="koti">
