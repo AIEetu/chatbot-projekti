@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<title>Agenttinäkymä</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; }
+  #kirjautuminen { max-width: 320px; margin: 80px auto; padding: 24px; background: white; border-radius: 12px; }
+  #kirjautuminen input { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; }
+  #kirjautuminen button { width: 100%; padding: 10px; background: #1F2A37; color: white; border: none; border-radius: 6px; cursor: pointer; }
+  #paanakyma { display: none; height: 100vh; }
+  .sarake { display: flex; height: 100%; }
+  #istuntolista { width: 280px; background: white; border-right: 1px solid #ddd; overflow-y: auto; }
+  .istunto-rivi { padding: 14px; border-bottom: 1px solid #eee; cursor: pointer; }
+  .istunto-rivi:hover { background: #f0f0f0; }
+  .istunto-rivi.odottaa { border-left: 4px solid #C1653F; }
+  #keskustelu { flex: 1; display: flex; flex-direction: column; }
+  #viestit { flex: 1; overflow-y: auto; padding: 20px; }
+  .viesti { max-width: 60%; margin-bottom: 10px; padding: 10px 14px; border-radius: 12px; }
+  .viesti.asiakas { background: #eee; align-self: flex-start; }
+  .viesti.agentti { background: #1F2A37; color: white; align-self: flex-end; margin-left: auto; }
+  #vastausrivi { display: flex; padding: 14px; border-top: 1px solid #ddd; }
+  #vastausrivi input { flex: 1; padding: 10px; }
+  #vastausrivi button { padding: 10px 20px; }
+</style>
+</head>
+<body>
+
+<div id="kirjautuminen">
+  <h2>Agenttikirjautuminen</h2>
+  <input type="text" id="asiakasTunnus" placeholder="Asiakastunnus (esim. kivijalka-koti)">
+  <input type="password" id="salasana" placeholder="Salasana">
+  <button onclick="kirjaudu()">Kirjaudu</button>
+  <p id="kirjautumisVirhe" style="color: red;"></p>
+</div>
+
+<div id="paanakyma">
+  <div class="sarake">
+    <div id="istuntolista"></div>
+    <div id="keskustelu">
+      <div id="viestit"></div>
+      <div id="vastausrivi">
+        <input type="text" id="vastausTeksti" placeholder="Kirjoita vastaus...">
+        <button onclick="lahetaVastaus()">Lähetä</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let ASIAKAS = '';
+  let SALASANA = '';
+  let AKTIIVINEN_ISTUNTO = null;
+
+  async function kirjaudu() {
+    ASIAKAS = document.getElementById('asiakasTunnus').value.trim();
+    SALASANA = document.getElementById('salasana').value;
+
+    const vastaus = await fetch('/api/live/kirjaudu', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ asiakas: ASIAKAS, salasana: SALASANA }),
+    });
+
+    if (vastaus.ok) {
+      document.getElementById('kirjautuminen').style.display = 'none';
+      document.getElementById('paanakyma').style.display = 'block';
+      paivitaIstuntolista();
+      setInterval(paivitaIstuntolista, 4000);
+      setInterval(() => { if (AKTIIVINEN_ISTUNTO) avaaIstunto(AKTIIVINEN_ISTUNTO, true); }, 3000);
+    } else {
+      document.getElementById('kirjautumisVirhe').textContent = 'Väärä tunnus tai salasana.';
+    }
+  }
+
+  async function paivitaIstuntolista() {
+    const vastaus = await fetch(`/api/live/istunnot?asiakas=${ASIAKAS}&salasana=${SALASANA}`);
+    if (!vastaus.ok) return;
+    const data = await vastaus.json();
+    const kontti = document.getElementById('istuntolista');
+    kontti.innerHTML = data.istunnot.map(i => `
+      <div class="istunto-rivi ${i.tila}" onclick="avaaIstunto('${i.istuntoId}')">
+        <strong>${i.nimi || 'Nimetön asiakas'}</strong><br>
+        <small>${i.tila === 'odottaa' ? '🟠 Odottaa' : '🟢 Käynnissä'}</small><br>
+        <small>${i.viimeisinViesti ? i.viimeisinViesti.teksti.slice(0, 40) : ''}</small>
+      </div>
+    `).join('');
+  }
+
+  async function avaaIstunto(istuntoId, hiljainenPaivitys) {
+    AKTIIVINEN_ISTUNTO = istuntoId;
+    const vastaus = await fetch(`/api/live/istunto?asiakas=${ASIAKAS}&salasana=${SALASANA}&istuntoId=${istuntoId}`);
+    if (!vastaus.ok) return;
+    const data = await vastaus.json();
+    const kontti = document.getElementById('viestit');
+    kontti.innerHTML = data.viestit.map(v => `<div class="viesti ${v.lahettaja}">${v.teksti}</div>`).join('');
+    if (!hiljainenPaivitys) kontti.scrollTop = kontti.scrollHeight;
+  }
+
+  async function lahetaVastaus() {
+    const teksti = document.getElementById('vastausTeksti').value.trim();
+    if (!teksti || !AKTIIVINEN_ISTUNTO) return;
+
+    await fetch('/api/live/viesti', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ asiakas: ASIAKAS, istuntoId: AKTIIVINEN_ISTUNTO, lahettaja: 'agentti', teksti }),
+    });
+
+    document.getElementById('vastausTeksti').value = '';
+    avaaIstunto(AKTIIVINEN_ISTUNTO);
+  }
+
+  document.getElementById('vastausTeksti').addEventListener('keydown', e => {
+    if (e.key === 'Enter') lahetaVastaus();
+  });
+</script>
+</body>
+</html>
