@@ -1008,10 +1008,14 @@
     panelHero.classList.toggle('hero-hidden', id !== 'view-home');
 
     // Nollataan keskustelu, kun poistutaan chat-näkymästä
-    if (edellinenNakyma === 'view-chat' && id !== 'view-chat') {
+        if (edellinenNakyma === 'view-chat' && id !== 'view-chat') {
       chatMessages.innerHTML = chatMessagesAlkutila;
       document.querySelectorAll('#chatMessages .option-bubble').forEach(btn => {
-        btn.addEventListener('click', () => sendToChat(btn.dataset.text));
+        if (btn.id === 'pyydaIhminenNappi') {
+          btn.addEventListener('click', pyydaIhminen);
+        } else {
+          btn.addEventListener('click', () => sendToChat(btn.dataset.text));
+        }
       });
     }
 
