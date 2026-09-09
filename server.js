@@ -20,6 +20,90 @@ const avaimet = {
 'kivijalka-koti': process.env.OPENAI_API_KEY_KIVIJALKA,
 'metsapolkuelainklinikka': process.env.OPENAI_API_KEY_METSAELAIN_KLINIKKA
 };
+// ---------- Live-chat: ihmisen reaaliaikainen mukaantulo ----------
+// Jokaiselle asiakasyritykselle oma salasana agenttisivulle
+const agenttiSalasanat = {
+  'kivijalka-koti': process.env.AGENTTI_SALASANA_KIVIJALKA,
+  // Lisää tähän jokainen uusi asiakas samalla kaavalla:
+  // 'asiakastunnus': process.env.AGENTTI_SALASANA_ASIAKASTUNNUS,
+};
+
+// Väliaikainen muisti: { asiakas: { istuntoId: { tila, viestit: [...] } } }
+const liveChatIstunnot = {};
+
+function haeTaiLuoIstunto(asiakas, istuntoId) {
+  if (!liveChatIstunnot[asiakas]) liveChatIstunnot[asiakas] = {};
+  if (!liveChatIstunnot[asiakas][istuntoId]) {
+    liveChatIstunnot[asiakas][istuntoId] = { tila: 'odottaa', viestit: [], luotu: Date.now(), asiakkaanNimi: '' };
+  }
+  return liveChatIstunnot[asiakas][istuntoId];
+}
+
+// Asiakas pyytää ihmistä keskusteluun
+app.post('/api/live/pyynto', (req, res) => {
+  const { asiakas, istuntoId, nimi } = req.body;
+  if (!asiakas || !istuntoId) return res.status(400).json({ virhe: 'Puuttuvia tietoja' });
+  const istunto = haeTaiLuoIstunto(asiakas, istuntoId);
+  istunto.tila = 'odottaa';
+  if (nimi) istunto.asiakkaanNimi = nimi;
+  res.json({ status: 'ok' });
+});
+
+// Viestin lähetys — käytetään sekä asiakkaan että agentin puolelta
+app.post('/api/live/viesti', (req, res) => {
+  const { asiakas, istuntoId, lahettaja, teksti } = req.body;
+  if (!asiakas || !istuntoId || !teksti) return res.status(400).json({ virhe: 'Puuttuvia tietoja' });
+  const istunto = haeTaiLuoIstunto(asiakas, istuntoId);
+  istunto.viestit.push({ lahettaja, teksti, aika: Date.now() });
+  if (lahettaja === 'agentti') istunto.tila = 'kaynnissa';
+  res.json({ status: 'ok' });
+});
+
+// Asiakkaan botti pollaa: onko uusia viestejä agentilta?
+app.get('/api/live/viestit', (req, res) => {
+  const { asiakas, istuntoId } = req.query;
+  const istunto = liveChatIstunnot[asiakas]?.[istuntoId];
+  if (!istunto) return res.json({ tila: 'odottaa', viestit: [] });
+  res.json({ tila: istunto.tila, viestit: istunto.viestit });
+});
+
+// Agentin kirjautuminen
+app.post('/api/live/kirjaudu', (req, res) => {
+  const { asiakas, salasana } = req.body;
+  if (agenttiSalasanat[asiakas] && agenttiSalasanat[asiakas] === salasana) {
+    res.json({ status: 'ok' });
+  } else {
+    res.status(401).json({ virhe: 'Väärä tunnus tai salasana' });
+  }
+});
+
+// Agentin näkymä pollaa: mitkä keskustelut ovat käynnissä/odottavat?
+app.get('/api/live/istunnot', (req, res) => {
+  const { asiakas, salasana } = req.query;
+  if (!agenttiSalasanat[asiakas] || agenttiSalasanat[asiakas] !== salasana) {
+    return res.status(401).json({ virhe: 'Ei oikeuksia' });
+  }
+  const istunnot = liveChatIstunnot[asiakas] || {};
+  const lista = Object.entries(istunnot)
+    .filter(([id, s]) => s.tila !== 'suljettu')
+    .map(([id, s]) => ({
+      istuntoId: id, tila: s.tila, nimi: s.asiakkaanNimi,
+      viimeisinViesti: s.viestit[s.viestit.length - 1] || null,
+    }))
+    .sort((a, b) => (b.viimeisinViesti?.aika || 0) - (a.viimeisinViesti?.aika || 0));
+  res.json({ istunnot: lista });
+});
+
+// Agentti hakee yhden istunnon täyden viestihistorian
+app.get('/api/live/istunto', (req, res) => {
+  const { asiakas, salasana, istuntoId } = req.query;
+  if (!agenttiSalasanat[asiakas] || agenttiSalasanat[asiakas] !== salasana) {
+    return res.status(401).json({ virhe: 'Ei oikeuksia' });
+  }
+  const istunto = liveChatIstunnot[asiakas]?.[istuntoId];
+  if (!istunto) return res.status(404).json({ virhe: 'Istuntoa ei löydy' });
+  res.json({ tila: istunto.tila, nimi: istunto.asiakkaanNimi, viestit: istunto.viestit });
+});
 
 const sheetsOsoitteet = {
   'turun-lukko': process.env.GOOGLE_SHEETS_URL_TURUN_LUKKO,

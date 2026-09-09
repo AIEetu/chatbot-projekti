@@ -815,6 +815,7 @@
         <button class="option-bubble" data-text="Etsin omistusasuntoa keskustasta">Etsin omistusasuntoa keskustasta</button>
         <button class="option-bubble" data-text="Haluan varata arviokäynnin nykyiseen asuntooni">Haluan varata arviokäynnin</button>
         <button class="option-bubble" data-text="Haluan kuulla uusista kohteista ensimmäisenä">Haluan kuulla uusista kohteista ensimmäisenä</button>
+      <button class="option-bubble" id="pyydaIhminenNappi">🙋 Puhu ihmisen kanssa</button>
       </div>
     </div>
 
@@ -1067,6 +1068,42 @@
   // ---------- "Takaisin"-palkki seuraa vierityksen suuntaa ----------
     let viimeisinScrollTop = 0;
   let vapaaChatTila = false; // true vain kun asiakas on avannut vapaan chatin "Chat"-napista
+    let ihmisTila = false;
+  let livePollausInterval = null;
+  let naytettyjaLiveViesteja = 0;
+
+  function pyydaIhminen() {
+    vapaaChatTila = true;
+    ihmisTila = true;
+    clearOptionBubbles();
+    addMessage('Pyydän hetken kärsivällisyyttä, yhdistän sinut asiakaspalveluumme...', 'bot');
+    kirjaaTapahtuma('ihminen_pyydetty');
+
+    fetch('/api/live/pyynto', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ asiakas: 'kivijalka-koti', istuntoId, nimi: '' }),
+    }).catch(() => {});
+
+    naytettyjaLiveViesteja = 0;
+    document.getElementById('chatInputRow').classList.add('active');
+
+    if (!livePollausInterval) {
+      livePollausInterval = setInterval(async () => {
+        try {
+          const vastaus = await fetch(`/api/live/viestit?asiakas=kivijalka-koti&istuntoId=${istuntoId}`);
+          const data = await vastaus.json();
+          const uudet = data.viestit.slice(naytettyjaLiveViesteja);
+          uudet.forEach(v => {
+            if (v.lahettaja === 'agentti') addMessage(v.teksti, 'bot');
+          });
+          naytettyjaLiveViesteja = data.viestit.length;
+        } catch (e) { /* hiljainen epäonnistuminen */ }
+      }, 3000);
+    }
+  }
+
+  document.getElementById('pyydaIhminenNappi')?.addEventListener('click', pyydaIhminen);
   let otsikkoOffset = 0;
 
   panelScroll.addEventListener('scroll', () => {
@@ -1685,13 +1722,22 @@
   const chatInput = document.getElementById('chatInput');
   chatInput?.addEventListener('keydown', e => { if (e.key === 'Enter') sendFromInput(); });
 
-  function sendFromInput() {
-    if (!chatInput.value.trim()) return;
-    const teksti = chatInput.value;
+    function sendFromInput() {
+    const teksti = chatInput.value.trim();
+    if (!teksti) return;
     clearOptionBubbles();
     addMessage(teksti, 'user');
     chatInput.value = '';
-    botReply(teksti);
+
+    if (ihmisTila) {
+      fetch('/api/live/viesti', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ asiakas: 'kivijalka-koti', istuntoId, lahettaja: 'asiakas', teksti }),
+      }).catch(() => {});
+    } else {
+      botReply(teksti);
+    }
   }
 
   // ---------- menu actions ----------
