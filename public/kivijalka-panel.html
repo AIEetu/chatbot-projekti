@@ -933,9 +933,6 @@
 
   <div class="bottom-nav">
     <button class="nav-btn active" data-navaction="koti">
-
-  <div class="bottom-nav">
-    <button class="nav-btn active" data-navaction="koti">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
       <span>Koti</span>
     </button>
@@ -1034,6 +1031,7 @@
 
     views.forEach(v => v.classList.toggle('active', v.id === id));
     document.getElementById('chatInputRow').classList.toggle('active', id === 'view-chat' && vapaaChatTila);
+    document.getElementById('ihminenLinkkiRivi').classList.toggle('active', id === 'view-chat' && vapaaChatTila);
     panelHero.classList.toggle('hero-hidden', id !== 'view-home');
 
     // Nollataan keskustelu, kun poistutaan chat-näkymästä
