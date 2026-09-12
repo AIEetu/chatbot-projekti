@@ -1124,6 +1124,19 @@
       livePollausInterval = null;
     }
   }
+    function suljeIhmisKeskustelu() {
+    if (!ihmisTila) return;
+    fetch('/api/live/sulje', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ asiakas: 'kivijalka-koti', istuntoId }),
+    }).catch(() => {});
+    ihmisTila = false;
+    if (livePollausInterval) {
+      clearInterval(livePollausInterval);
+      livePollausInterval = null;
+    }
+  }
 
     fetch('/api/live/pyynto', {
       method: 'POST',
