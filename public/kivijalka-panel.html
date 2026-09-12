@@ -1105,38 +1105,12 @@
   let livePollausInterval = null;
   let naytettyjaLiveViesteja = 0;
 
-  function pyydaIhminen() {
+    function pyydaIhminen() {
     vapaaChatTila = true;
     ihmisTila = true;
     clearOptionBubbles();
     addMessage('Pyydän hetken kärsivällisyyttä, yhdistän sinut asiakaspalveluumme...', 'bot');
     kirjaaTapahtuma('ihminen_pyydetty');
-      function suljeIhmisKeskustelu() {
-    if (!ihmisTila) return; // ei tehdä mitään jos live-chat ei ollut edes käynnissä
-    fetch('/api/live/sulje', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ asiakas: 'kivijalka-koti', istuntoId }),
-    }).catch(() => {});
-    ihmisTila = false;
-    if (livePollausInterval) {
-      clearInterval(livePollausInterval);
-      livePollausInterval = null;
-    }
-  }
-    function suljeIhmisKeskustelu() {
-    if (!ihmisTila) return;
-    fetch('/api/live/sulje', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ asiakas: 'kivijalka-koti', istuntoId }),
-    }).catch(() => {});
-    ihmisTila = false;
-    if (livePollausInterval) {
-      clearInterval(livePollausInterval);
-      livePollausInterval = null;
-    }
-  }
 
     fetch('/api/live/pyynto', {
       method: 'POST',
@@ -1161,6 +1135,21 @@
       }, 3000);
     }
   }
+
+  function suljeIhmisKeskustelu() {
+    if (!ihmisTila) return;
+    fetch('/api/live/sulje', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ asiakas: 'kivijalka-koti', istuntoId }),
+    }).catch(() => {});
+    ihmisTila = false;
+    if (livePollausInterval) {
+      clearInterval(livePollausInterval);
+      livePollausInterval = null;
+    }
+  }
+
 
   document.getElementById('pyydaIhminenNappi')?.addEventListener('click', pyydaIhminen);
   let otsikkoOffset = 0;

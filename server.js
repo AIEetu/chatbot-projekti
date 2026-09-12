@@ -59,6 +59,14 @@ app.post('/api/live/viesti', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Asiakas sulkee keskustelun (X, Takaisin, tai siirtyy pois chatista)
+app.post('/api/live/sulje', (req, res) => {
+  const { asiakas, istuntoId } = req.body;
+  const istunto = liveChatIstunnot[asiakas]?.[istuntoId];
+  if (istunto) istunto.tila = 'suljettu';
+  res.json({ status: 'ok' });
+});
+
 // Asiakkaan botti pollaa: onko uusia viestejä agentilta?
 app.get('/api/live/viestit', (req, res) => {
   const { asiakas, istuntoId } = req.query;
