@@ -650,24 +650,7 @@
     border-top: 1px solid var(--stone);
     background: var(--white); flex-shrink: 0;
   }
-  .chat-input-row.active { display: flex; }
-    .ihminen-linkkirivi {
-    display: none;
-    justify-content: center;
-    padding: 4px 16px 14px;
-    background: var(--white);
-    flex-shrink: 0;
-  }
-  .ihminen-linkkirivi.active { display: flex; }
-  .ihminen-linkkirivi button {
-    all: unset;
-    cursor: pointer;
-    color: var(--clay-deep);
-    font-family: inherit;
-    font-size: 12.5px;
-    font-weight: 600;
-    text-decoration: underline;
-  }
+  
   .chat-input-row input {
     flex: 1; border: 1.5px solid var(--stone); border-radius: 999px;
     padding: 11px 16px; font-size: 16px; outline: none; font-family: inherit;
@@ -927,9 +910,6 @@
     </button>
   </div>
 
-  <div class="ihminen-linkkirivi" id="ihminenLinkkiRivi">
-    <button type="button" id="pyydaIhminenNappi">🙋 Puhu ihmisen kanssa</button>
-  </div>
 
   <div class="bottom-nav">
     <button class="nav-btn active" data-navaction="koti">
@@ -1004,7 +984,6 @@
   // ---------- sulkeminen: viestitään host-sivulle (widget.js piilottaa iframen) ----------
   const closeBtn = document.getElementById('closeBtn');
     closeBtn.addEventListener('click', () => {
-    suljeIhmisKeskustelu();
     window.parent.postMessage('sulje-chat', '*');
     kirjaaTapahtuma('chat_suljettu');
   });
@@ -1032,20 +1011,11 @@
 
     views.forEach(v => v.classList.toggle('active', v.id === id));
     document.getElementById('chatInputRow').classList.toggle('active', id === 'view-chat' && vapaaChatTila);
-    document.getElementById('ihminenLinkkiRivi').classList.toggle('active', id === 'view-chat' && vapaaChatTila);
     panelHero.classList.toggle('hero-hidden', id !== 'view-home');
 
     // Nollataan keskustelu, kun poistutaan chat-näkymästä
            if (edellinenNakyma === 'view-chat' && id !== 'view-chat') {
-      suljeIhmisKeskustelu();
-      chatMessages.innerHTML = chatMessagesAlkutila;
-      document.querySelectorAll('#chatMessages .option-bubble').forEach(btn => {
-        if (btn.id === 'pyydaIhminenNappi') {
-          btn.addEventListener('click', pyydaIhminen);
-        } else {
-          btn.addEventListener('click', () => sendToChat(btn.dataset.text));
-        }
-      });
+
     }
 
     // Nollataan otsikkopalkin sijainti ja vieritys aina kun näkymä vaihtuu
@@ -1101,16 +1071,7 @@
   // ---------- "Takaisin"-palkki seuraa vierityksen suuntaa ----------
     let viimeisinScrollTop = 0;
   let vapaaChatTila = false; // true vain kun asiakas on avannut vapaan chatin "Chat"-napista
-    let ihmisTila = false;
-  let livePollausInterval = null;
-  let naytettyjaLiveViesteja = 0;
-
-    function pyydaIhminen() {
-    vapaaChatTila = true;
-    ihmisTila = true;
-    clearOptionBubbles();
-    addMessage('Pyydän hetken kärsivällisyyttä, yhdistän sinut asiakaspalveluumme...', 'bot');
-    kirjaaTapahtuma('ihminen_pyydetty');
+  
 
     fetch('/api/live/pyynto', {
       method: 'POST',
@@ -1134,24 +1095,9 @@
         } catch (e) { /* hiljainen epäonnistuminen */ }
       }, 3000);
     }
-  }
-
-  function suljeIhmisKeskustelu() {
-    if (!ihmisTila) return;
-    fetch('/api/live/sulje', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ asiakas: 'kivijalka-koti', istuntoId }),
-    }).catch(() => {});
-    ihmisTila = false;
-    if (livePollausInterval) {
-      clearInterval(livePollausInterval);
-      livePollausInterval = null;
-    }
-  }
+  
 
 
-  document.getElementById('pyydaIhminenNappi')?.addEventListener('click', pyydaIhminen);
   let otsikkoOffset = 0;
 
   panelScroll.addEventListener('scroll', () => {
@@ -1777,16 +1723,9 @@
     addMessage(teksti, 'user');
     chatInput.value = '';
 
-    if (ihmisTila) {
-      fetch('/api/live/viesti', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ asiakas: 'kivijalka-koti', istuntoId, lahettaja: 'asiakas', teksti }),
-      }).catch(() => {});
-    } else {
-      botReply(teksti);
+
+    botReply(teksti);
     }
-  }
 
   // ---------- menu actions ----------
   document.querySelectorAll('.menu-item, .offer-cta').forEach(btn => {
