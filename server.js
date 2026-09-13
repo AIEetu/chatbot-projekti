@@ -134,6 +134,11 @@ app.post('/api/chat', async (req, res) => {
     if (!apiAvain) {
       return res.status(404).json({ virhe: 'API-avainta ei löydy asiakkaalle: ' + asiakas });
     }
+    const headers = {
+      'Authorization': `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+   'Content-Type': 'application/json',
+    };
+
 
     const openai = new OpenAI({ apiKey: apiAvain });
 
