@@ -35,6 +35,27 @@ app.get('/api/asetukset/:asiakas', (req, res) => {
   if (!fs.existsSync(asetuksetPolku)) {
     return res.status(404).json({ virhe: 'Asiakasta ei löydy: ' + asiakas });
   }
+  // Reitti: tallentaa analytiikkatapahtuman Google Sheetsiin
+app.post('/api/tapahtuma', async (req, res) => {
+  try {
+    const { asiakas, tapahtuma, lisatieto, istuntoId, sivu, aikaleima } = req.body;
+
+    if (!process.env.GOOGLE_SHEETS_ANALYTIIKKA_URL) {
+      return res.json({ status: 'ohitettu' });
+    }
+
+    fetch(process.env.GOOGLE_SHEETS_ANALYTIIKKA_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ asiakas, tapahtuma, lisatieto, istuntoId, sivu, aikaleima }),
+    }).catch(virhe => console.error('Analytiikan tallennus epäonnistui:', virhe));
+
+    res.json({ status: 'ok' });
+  } catch (virhe) {
+    console.error(virhe);
+    res.json({ status: 'virhe_ohitettu' });
+  }
+});
 
   const asetukset = JSON.parse(fs.readFileSync(asetuksetPolku, 'utf8'));
   res.json(asetukset);
