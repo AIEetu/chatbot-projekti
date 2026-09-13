@@ -981,17 +981,14 @@
     }
   }
 
-  // ---------- sulkeminen: viestitään host-sivulle (widget.js piilottaa iframen) ----------
-  closeBtn.addEventListener('click', () => {
+ closeBtn.addEventListener('click', () => {
   kirjaaTapahtuma('chat_suljettu');
   window.parent.postMessage('sulje-chat', '*');
-
-  // Nollataan botti täysin, jotta seuraava avaus alkaa aina puhtaalta pöydältä
   setTimeout(() => {
-    chatMessages.innerHTML = chatMessagesAlkutila;
+    nollaaChat();
     showView('view-home');
     paivitaAlapalkki('koti');
-  }, 300); // pieni viive, ettei nollaus näy kesken sulkeutumisanimaation
+  }, 300);
 });
 
   kirjaaTapahtuma('chat_avattu');
@@ -1012,6 +1009,21 @@
 
   const chatMessagesAlkutila = chatMessages.innerHTML; // tallennetaan alkuperäinen sisältö nollausta varten
 
+  function nollaaChat() {
+  chatMessages.innerHTML = chatMessagesAlkutila;
+  document.querySelectorAll('#chatMessages .option-bubble').forEach(btn => {
+    btn.addEventListener('click', () => sendToChat(btn.dataset.text));
+  });
+  myyntivastaukset.tyyppi = null;
+  myyntivastaukset.koko = null;
+  myyntivastaukset.aikataulu = null;
+  myyntivastaukset.remontit = null;
+  ostovastaukset.budjetti = null;
+  ostovastaukset.tyyppi = null;
+  ostovastaukset.huoneet = null;
+  ostovastaukset.ominaisuudet = null;
+  ostovastaukset.aikataulu = null;
+}
   function showView(id) {
     const edellinenNakyma = document.querySelector('.view.active')?.id;
 
@@ -1020,9 +1032,9 @@
     panelHero.classList.toggle('hero-hidden', id !== 'view-home');
 
     // Nollataan keskustelu, kun poistutaan chat-näkymästä
-           if (edellinenNakyma === 'view-chat' && id !== 'view-chat') {
-
-    }
+   if (edellinenNakyma === 'view-chat' && id !== 'view-chat') {
+  nollaaChat();
+}
 
     // Nollataan otsikkopalkin sijainti ja vieritys aina kun näkymä vaihtuu
     panelScroll.scrollTop = 0;
@@ -1098,11 +1110,12 @@
   }, { passive: true });
 
   document.querySelectorAll('[data-back]').forEach(el => {
-    el.addEventListener('click', () => {
-      showView(el.dataset.back);
-      paivitaAlapalkki('koti');
-    });
+  el.addEventListener('click', () => {
+    nollaaChat();
+    showView(el.dataset.back);
+    paivitaAlapalkki('koti');
   });
+});
 
   // ---------- chat ----------
   function addMessage(text, sender) {
