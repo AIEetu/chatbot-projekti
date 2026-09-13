@@ -1071,33 +1071,6 @@
   // ---------- "Takaisin"-palkki seuraa vierityksen suuntaa ----------
     let viimeisinScrollTop = 0;
   let vapaaChatTila = false; // true vain kun asiakas on avannut vapaan chatin "Chat"-napista
-  
-
-    fetch('/api/live/pyynto', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ asiakas: 'kivijalka-koti', istuntoId, nimi: '' }),
-    }).catch(() => {});
-
-    naytettyjaLiveViesteja = 0;
-    document.getElementById('chatInputRow').classList.add('active');
-
-    if (!livePollausInterval) {
-      livePollausInterval = setInterval(async () => {
-        try {
-          const vastaus = await fetch(`/api/live/viestit?asiakas=kivijalka-koti&istuntoId=${istuntoId}`);
-          const data = await vastaus.json();
-          const uudet = data.viestit.slice(naytettyjaLiveViesteja);
-          uudet.forEach(v => {
-            if (v.lahettaja === 'agentti') addMessage(v.teksti, 'bot');
-          });
-          naytettyjaLiveViesteja = data.viestit.length;
-        } catch (e) { /* hiljainen epäonnistuminen */ }
-      }, 3000);
-    }
-  
-
-
   let otsikkoOffset = 0;
 
   panelScroll.addEventListener('scroll', () => {
