@@ -78,13 +78,17 @@
     if (!vastaus.ok) return;
     const data = await vastaus.json();
     const kontti = document.getElementById('istuntolista');
-    kontti.innerHTML = data.istunnot.map(i => `
-      <div class="istunto-rivi ${i.tila}" onclick="avaaIstunto('${i.istuntoId}')">
+        kontti.innerHTML = data.istunnot.map(i => {
+      let tilaTeksti = '🟢 Käynnissä';
+      if (i.tila === 'odottaa') tilaTeksti = '🟠 Odottaa';
+      if (i.tila === 'suljettu') tilaTeksti = '🔒 Suljettu';
+      return `
+      <div class="istunto-rivi ${i.tila}" onclick="avaaIstunto('${i.istuntoId}')" style="${i.tila === 'suljettu' ? 'opacity: 0.55;' : ''}">
         <strong>${i.nimi || 'Nimetön asiakas'}</strong><br>
-        <small>${i.tila === 'odottaa' ? '🟠 Odottaa' : '🟢 Käynnissä'}</small><br>
+        <small>${tilaTeksti}</small><br>
         <small>${i.viimeisinViesti ? i.viimeisinViesti.teksti.slice(0, 40) : ''}</small>
       </div>
-    `).join('');
+    `}).join('');
   }
 
   async function avaaIstunto(istuntoId, hiljainenPaivitys) {

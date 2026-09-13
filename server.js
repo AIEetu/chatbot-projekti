@@ -91,7 +91,7 @@ app.get('/api/live/istunnot', (req, res) => {
   if (!agenttiSalasanat[asiakas] || agenttiSalasanat[asiakas] !== salasana) {
     return res.status(401).json({ virhe: 'Ei oikeuksia' });
   }
-  const istunnot = liveChatIstunnot[asiakas] || {};
+   const istunnot = liveChatIstunnot[asiakas] || {};
   const lista = Object.entries(istunnot)
     .filter(([id, s]) => s.tila !== 'suljettu')
     .map(([id, s]) => ({
