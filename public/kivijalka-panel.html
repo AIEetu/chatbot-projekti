@@ -982,11 +982,17 @@
   }
 
   // ---------- sulkeminen: viestitään host-sivulle (widget.js piilottaa iframen) ----------
-  const closeBtn = document.getElementById('closeBtn');
-    closeBtn.addEventListener('click', () => {
-    window.parent.postMessage('sulje-chat', '*');
-    kirjaaTapahtuma('chat_suljettu');
-  });
+  closeBtn.addEventListener('click', () => {
+  kirjaaTapahtuma('chat_suljettu');
+  window.parent.postMessage('sulje-chat', '*');
+
+  // Nollataan botti täysin, jotta seuraava avaus alkaa aina puhtaalta pöydältä
+  setTimeout(() => {
+    chatMessages.innerHTML = chatMessagesAlkutila;
+    showView('view-home');
+    paivitaAlapalkki('koti');
+  }, 300); // pieni viive, ettei nollaus näy kesken sulkeutumisanimaation
+});
 
   kirjaaTapahtuma('chat_avattu');
 
