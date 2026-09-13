@@ -20,6 +20,7 @@ const avaimet = {
 'kivijalka-koti': process.env.OPENAI_API_KEY_KIVIJALKA,
 'metsapolkuelainklinikka': process.env.OPENAI_API_KEY_METSAELAIN_KLINIKKA
 };
+const HUBSPOT_OMISTAJA_ID = '97707912';
 
 
 const sheetsOsoitteet = {
