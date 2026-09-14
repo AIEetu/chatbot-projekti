@@ -1285,6 +1285,169 @@
     botReply(text);
   }
 
+  // ================================================================
+  // KYSELYMOOTTORI — konfiguroitavat ohjatut kyselyt (JSON-tyylinen data)
+  // Uuden kyselyn lisääminen = uusi lohko tähän, ei uutta koodia funktioihin
+  // ================================================================
+  const kyselyMaaritykset = {
+    'myynti-kysely-v2': {
+      aloitusviesti: 'Haluaisin myydä asuntoni.',
+      tapahtumaAloitus: 'myyntikysely_aloitettu',
+      alkuvastaus: 'Hienoa! Autan mielelläni — kysyn muutaman nopean kysymyksen, jotta osaan valmistella arviokäynnin oikein.',
+      palvelu: 'Myyntikysely / arviokäyntipyyntö',
+      askeleet: [
+        {
+          tyyppi: 'yksi',
+          kysymys: 'Minkälainen kotisi on?',
+          vaihtoehdot: ['🏢 Kerrostalo', '🏡 Omakotitalo', '🏘️ Rivitalo', '💬 Muu'],
+          kentta: 'kotityyppi',
+        },
+        {
+          tyyppi: 'yksi',
+          kysymys: 'Kuinka monta neliötä kotisi on suurin piirtein?',
+          vaihtoehdot: ['Alle 40 m²', '40–70 m²', '70–100 m²', 'Yli 100 m²'],
+          kentta: 'koko',
+        },
+        {
+          tyyppi: 'moni',
+          kysymys: 'Onko kotiisi tehty remontteja? Voit valita monta.',
+          vaihtoehdot: ['🍳 Keittiö', '🚿 Kylpyhuone', '🎨 Pintaremontti', '🏠 Peruskorjaukset tekemättä', '💬 Muu'],
+          poissulkeva: 'tekemättä',
+          kentta: 'remontit',
+        },
+        {
+          tyyppi: 'yksi',
+          kysymys: 'Milloin toivoisit myyväsi?',
+          vaihtoehdot: ['Heti', '1–3 kk sisällä', 'Myöhemmin tänä vuonna', 'Vain kartoitan tilannetta'],
+          kentta: 'aikataulu',
+          jatkoviesti: 'Kiitos! Valitse vielä sinulle sopiva päivä maksuttomaan arviokäyntiin.',
+        },
+        {
+          tyyppi: 'kalenteri',
+          kentta: 'varattuAika',
+        },
+        {
+          tyyppi: 'yhteystietolomake',
+          jatkoviesti: 'Hienoa! Jätä vielä yhteystietosi, niin vahvistamme ajan.',
+        },
+      ],
+    },
+  };
+    // Käynnistää minkä tahansa kyselyMaarityksiin määritellyn kyselyn
+  function aloitaKysely(kyselyId) {
+    const kysely = kyselyMaaritykset[kyselyId];
+    if (!kysely) { console.error('Tuntematon kysely:', kyselyId); return; }
+
+    vapaaChatTila = false;
+    showView('view-chat');
+    clearOptionBubbles();
+    addMessage(kysely.aloitusviesti, 'user');
+    kirjaaTapahtuma(kysely.tapahtumaAloitus);
+
+    const vastaukset = {};
+
+    setTimeout(() => {
+      addMessage(kysely.alkuvastaus, 'bot');
+      setTimeout(() => suoritaAskel(kysely, 0, vastaukset), 450);
+    }, 350);
+  }
+
+  // Suorittaa yhden askeleen kyselystä, ja kutsuu itseään seuraavalle askeleelle
+  function suoritaAskel(kysely, indeksi, vastaukset) {
+    if (indeksi >= kysely.askeleet.length) return; // kysely valmis
+
+    const askel = kysely.askeleet[indeksi];
+
+    function seuraavaan() {
+      setTimeout(() => {
+        if (askel.jatkoviesti) {
+          addMessage(askel.jatkoviesti, 'bot');
+          setTimeout(() => suoritaAskel(kysely, indeksi + 1, vastaukset), 400);
+        } else {
+          suoritaAskel(kysely, indeksi + 1, vastaukset);
+        }
+      }, 300);
+    }
+
+    if (askel.tyyppi === 'yksi') {
+      addMessage(askel.kysymys, 'bot');
+      naytaKyselyVaihtoehdot(askel.vaihtoehdot, (vastaus) => {
+        vastaukset[askel.kentta] = vastaus;
+        seuraavaan();
+      });
+
+    } else if (askel.tyyppi === 'moni') {
+      addMessage(askel.kysymys, 'bot');
+      naytaMonivalinta(askel.vaihtoehdot, (valitut) => {
+        vastaukset[askel.kentta] = valitut.join(', ');
+        seuraavaan();
+      });
+
+    } else if (askel.tyyppi === 'kalenteri') {
+      naytaKalenteri((paiva, aika) => {
+        vastaukset[askel.kentta] = `${paiva} klo ${aika}`;
+        seuraavaan();
+      });
+
+    } else if (askel.tyyppi === 'yhteystietolomake') {
+      naytaGeneerinenYhteystietolomake(kysely, vastaukset);
+    }
+  }
+
+  // Yleiskäyttöinen yhteystietolomake minkä tahansa kyselyn lopuksi
+  function naytaGeneerinenYhteystietolomake(kysely, vastaukset) {
+    const kontti = document.createElement('div');
+    kontti.className = 'kysely-vaihtoehdot';
+    kontti.style.flexDirection = 'column';
+    kontti.style.width = '100%';
+
+    kontti.innerHTML = `
+      <input class="form-field" type="text" id="geen-nimi" placeholder="Nimi" style="margin:0;">
+      <input class="form-field" type="tel" id="geen-puhelin" placeholder="Puhelinnumero" style="margin:0;">
+      <input class="form-field" type="email" id="geen-sahkoposti" placeholder="Sähköposti" style="margin:0;">
+      <button class="offer-cta" id="geen-laheta" style="width:100%;">Lähetä tiedot</button>
+    `;
+
+    chatMessages.appendChild(kontti);
+    panelScroll.scrollTop = panelScroll.scrollHeight;
+
+    document.getElementById('geen-laheta').addEventListener('click', async () => {
+      const nimi = document.getElementById('geen-nimi').value.trim();
+      const puhelin = document.getElementById('geen-puhelin').value.trim();
+      const sahkoposti = document.getElementById('geen-sahkoposti').value.trim();
+
+      if (!nimi || !puhelin) {
+        alert('Täytä ainakin nimi ja puhelinnumero.');
+        return;
+      }
+
+      kontti.remove();
+      addMessage('✅ Yhteystiedot lähetetty', 'user');
+
+      const viesti = Object.entries(vastaukset)
+        .map(([kentta, arvo]) => `${kentta}: ${arvo}`)
+        .join(', ');
+
+      try {
+        await fetch('/api/tarjous', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            asiakas: 'kivijalka-koti',
+            palvelu: kysely.palvelu,
+            nimi, puhelin, sahkoposti,
+            viesti,
+            ...vastaukset,
+          }),
+        });
+      } catch (virhe) {
+        console.error('Tallennus epäonnistui', virhe);
+      }
+
+      addMessage('Kiitos! Olemme sinuun yhteydessä pian.', 'bot');
+    });
+  }
+
   // ---------- ohjattu "Myyn asuntoni" -kysely ----------
   const myyntivastaukset = {};
 
