@@ -227,10 +227,16 @@
     overflow-y: auto;
   }
 
-  .view { display: none; }
+    .view {
+    display: none;
+    opacity: 0;
+    transform: translateX(8px);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
   .view.active {
     display: block;
-    animation: viewFade 0.28s cubic-bezier(.2,.8,.3,1) both;
+    opacity: 1;
+    transform: translateX(0);
   }
   @keyframes viewFade {
     from { opacity: 0; transform: translateY(6px) scale(0.995); }
@@ -1027,14 +1033,21 @@
   function showView(id) {
     const edellinenNakyma = document.querySelector('.view.active')?.id;
 
-    views.forEach(v => v.classList.toggle('active', v.id === id));
-    document.getElementById('chatInputRow').classList.toggle('active', id === 'view-chat' && vapaaChatTila);
+    views.forEach(v => {
+      if (v.id === id) {
+        v.style.display = 'block';
+        requestAnimationFrame(() => v.classList.add('active'));
+      } else {
+        v.classList.remove('active');
+      }
+    });
+
     panelHero.classList.toggle('hero-hidden', id !== 'view-home');
 
     // Nollataan keskustelu, kun poistutaan chat-näkymästä
-   if (edellinenNakyma === 'view-chat' && id !== 'view-chat') {
-  nollaaChat();
-}
+    if (edellinenNakyma === 'view-chat' && id !== 'view-chat') {
+      nollaaChat();
+    }
 
     // Nollataan otsikkopalkin sijainti ja vieritys aina kun näkymä vaihtuu
     panelScroll.scrollTop = 0;
@@ -1042,6 +1055,10 @@
     otsikkoOffset = 0;
     const uusiHeader = document.querySelector('.view.active .view-header');
     if (uusiHeader) uusiHeader.style.transform = 'translateY(0)';
+
+    setTimeout(() => {
+      views.forEach(v => { if (v.id !== id) v.style.display = 'none'; });
+    }, 250);
   }
 
   function paivitaAlapalkki(aktiivinen) {
