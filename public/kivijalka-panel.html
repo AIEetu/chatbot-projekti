@@ -714,6 +714,48 @@
   @media (hover: hover) and (pointer: fine) {
     .submit-btn:hover { background: var(--clay-deep); }
   }
+   /* ---- kalenteri (arviokäyntiajan valinta) ---- */
+  .kalenteri-otsikko {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 4px 10px;
+    font-weight: 700; font-size: 14px; color: var(--navy);
+  }
+  .kalenteri-nuoli {
+    background: var(--cream); border: 1px solid var(--stone);
+    width: 30px; height: 30px; border-radius: 50%;
+    font-size: 16px; color: var(--navy); cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .kalenteri-viikonpaivat {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 4px; margin-bottom: 4px;
+  }
+  .kalenteri-viikonpaivat span {
+    text-align: center; font-size: 11px; color: #8a8378; font-weight: 600;
+  }
+  .kalenteri-ruudukko {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+  .kalenteri-paiva {
+    aspect-ratio: 1; border-radius: 50%;
+    border: 1.5px solid transparent;
+    background: var(--cream);
+    font-family: inherit; font-size: 13px; color: var(--ink);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .kalenteri-paiva:not(.pois-kaytosta):hover {
+      border-color: var(--clay);
+      background: var(--clay-light);
+    }
+  }
+  .kalenteri-paiva.pois-kaytosta {
+    color: #cfc7ba; cursor: not-allowed; background: none;
+  }
+</style> 
 
 </style>
 </head>
