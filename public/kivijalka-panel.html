@@ -1095,7 +1095,7 @@
   document.querySelectorAll('[data-valikko]').forEach(el => {
     el.addEventListener('click', () => {
       const toiminto = el.dataset.valikko;
-      if (toiminto === 'myynti-kysely') aloitaMyyntikysely();
+      if (toiminto === 'myynti-kysely') aloitaKysely('myynti-kysely-v2');
       else if (toiminto === 'osto-kysely') aloitaOstokysely();
       else if (toiminto === 'goto-kohteet') { showView('view-kohteet'); paivitaAlapalkki(''); }
       else if (toiminto === 'open-contact') openContactModal();
@@ -1907,7 +1907,7 @@
       if (action === 'goto-kohteet') showView('view-kohteet');
       else if (action === 'open-contact') openContactModal();
       else if (action === 'chat') sendToChat(btn.dataset.text);
-      else if (action === 'myynti-kysely') aloitaMyyntikysely();
+      else if (action === 'myynti-kysely') aloitaKysely('myynti-kysely-v2');
       else if (action === 'osto-kysely') aloitaOstokysely();
     });
   });
