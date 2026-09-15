@@ -1083,7 +1083,7 @@
         v.classList.remove('active');
       }
     });
-
+        document.getElementById('chatInputRow').classList.toggle('active', id === 'view-chat' && vapaaChatTila);
     panelHero.classList.toggle('hero-hidden', id !== 'view-home');
 
     // Nollataan keskustelu, kun poistutaan chat-näkymästä
