@@ -2046,20 +2046,20 @@
 
  document.getElementById('sendBtn')?.addEventListener('click', sendFromInput);
 
-chatInput.addEventListener('input', () => {
-  chatInput.style.height = 'auto';
-  chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px';
-});
-
-chatInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendFromInput();
-    chatInput.style.height = 'auto';
-  }
-});
   const chatInput = document.getElementById('chatInput');
-  chatInput?.addEventListener('keydown', e => { if (e.key === 'Enter') sendFromInput(); });
+
+  chatInput.addEventListener('input', () => {
+    chatInput.style.height = 'auto';
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px';
+  });
+
+  chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendFromInput();
+      chatInput.style.height = 'auto';
+    }
+  });
 
     function sendFromInput() {
     const teksti = chatInput.value.trim();
