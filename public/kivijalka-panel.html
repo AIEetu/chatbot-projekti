@@ -1220,6 +1220,17 @@
   function clearOptionBubbles() {
     chatMessages.querySelectorAll('.option-bubble').forEach(b => b.remove());
   }
+    // Poistaa Markdown-muotoilumerkit tekoälyn vastauksesta, jos niitä silti ilmestyy
+  function siistiAiVastaus(teksti) {
+    if (!teksti) return teksti;
+    return teksti
+      .replace(/\*\*(.*?)\*\*/g, '$1')   // **lihavointi** -> teksti
+      .replace(/\*(.*?)\*/g, '$1')        // *kursivointi* -> teksti
+      .replace(/#{1,6}\s?/g, '')          // # otsikot pois
+      .replace(/^[-*]\s+/gm, '• ')        // - listat -> siisti piste
+      .replace(/`{1,3}/g, '')             // koodimerkinnät pois
+      .trim();
+  }
 
   // Yhdistetty /api/chat -reittiin, asiakas: 'kivijalka-koti'
   async function botReply(kysymys) {
@@ -1239,7 +1250,7 @@
       });
       const data = await vastaus.json();
       kirjoittaa.remove();
-      addMessage(data.vastaus, 'bot');
+      addMessage(siistiAiVastaus(data.vastaus), 'bot');
 
       // Tunnistetaan karkeasti tilanteet, joissa botti ei löytänyt vastausta tiedoista —
       // näiden kysymysten perusteella tiedot.txt-tiedostoa kannattaa täydentää.

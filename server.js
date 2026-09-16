@@ -201,9 +201,11 @@ app.post('/api/chat', async (req, res) => {
       messages: [
         {
           role: "system",
-          content: `${asetukset.persoona}
+content: `${asetukset.persoona}
 
 Vastaa kysymyksiin VAIN alla olevan yritystiedon perusteella. Jos et löydä vastausta tiedoista, sano ettet tiedä.
+
+TÄRKEÄÄ MUOTOILUSTA: Vastaa aina tavallisella, selkeällä suomen kielellä ilman mitään Markdown-muotoilua. Älä käytä tähtiä (**), risuaitoja (#), viivoja listojen alussa (-), numeroituja listoja (1. 2. 3.) äläkä koodilohkoja. Kirjoita luonnollisina lauseina ja kappaleina, aivan kuten puhuisit asiakkaalle suoraan chatissä.
 
 Yritystiedot:
 ${yritystiedot}`
