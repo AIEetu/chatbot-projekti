@@ -1231,6 +1231,24 @@
       .replace(/`{1,3}/g, '')             // koodimerkinnät pois
       .trim();
   }
+    // Näyttää tekoälyn vastauksen useampana peräkkäisenä kuplana yhden ison sijaan
+  function naytaVastausKuplina(teksti) {
+    const kappaleet = teksti
+      .split(/\n\s*\n/)
+      .map(k => k.trim())
+      .filter(k => k.length > 0);
+
+    if (kappaleet.length <= 1) {
+      addMessage(teksti, 'bot');
+      return;
+    }
+
+    kappaleet.forEach((kappale, i) => {
+      setTimeout(() => {
+        addMessage(kappale, 'bot');
+      }, i * 500);
+    });
+  }
 
   // Yhdistetty /api/chat -reittiin, asiakas: 'kivijalka-koti'
   async function botReply(kysymys) {
@@ -1250,7 +1268,7 @@
       });
       const data = await vastaus.json();
       kirjoittaa.remove();
-      addMessage(siistiAiVastaus(data.vastaus), 'bot');
+      naytaVastausKuplina(siistiAiVastaus(data.vastaus));
 
       // Tunnistetaan karkeasti tilanteet, joissa botti ei löytänyt vastausta tiedoista —
       // näiden kysymysten perusteella tiedot.txt-tiedostoa kannattaa täydentää.
