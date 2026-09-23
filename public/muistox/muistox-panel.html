@@ -1383,49 +1383,30 @@
   // Uuden kyselyn lisääminen = uusi lohko tähän, ei uutta koodia funktioihin
   // ================================================================
   const kyselyMaaritykset = {
-    'myynti-kysely-v2': {
-      aloitusviesti: 'Haluaisin myydä asuntoni.',
-      tapahtumaAloitus: 'myyntikysely_aloitettu',
-      alkuvastaus: 'Hienoa! Autan mielelläni — kysyn muutaman nopean kysymyksen, jotta osaan valmistella arviokäynnin oikein.',
-      palvelu: 'Myyntikysely / arviokäyntipyyntö',
+   'muistox-tarjous': {
+      aloitusviesti: 'Haluaisin varata kuvauskopin tapahtumaani.',
+      tapahtumaAloitus: 'muistox_varauskysely_aloitettu',
+      alkuvastaus: 'Hienoa! Kysyn muutaman nopean kysymyksen, jotta osaan valmistella tarjouksen oikein.',
+      palvelu: 'Varauskysely / tarjouspyyntö',
+      asiakas: 'muistox',
       askeleet: [
         {
           tyyppi: 'yksi',
-          kysymys: 'Minkälainen kotisi on?',
-          vaihtoehdot: ['🏢 Kerrostalo', '🏡 Omakotitalo', '🏘️ Rivitalo', '💬 Muu'],
-          kentta: 'kotityyppi',
-        },
-        {
-          tyyppi: 'yksi',
-          kysymys: 'Kuinka monta neliötä kotisi on suurin piirtein?',
-          vaihtoehdot: ['Alle 40 m²', '40–70 m²', '70–100 m²', 'Yli 100 m²'],
-          kentta: 'koko',
-        },
-        {
-          tyyppi: 'moni',
-          kysymys: 'Onko kotiisi tehty remontteja? Voit valita monta.',
-          vaihtoehdot: ['🍳 Keittiö', '🚿 Kylpyhuone', '🎨 Pintaremontti', '🏠 Peruskorjaukset tekemättä', '💬 Muu'],
-          poissulkeva: 'tekemättä',
-          kentta: 'remontit',
-        },
-        {
-          tyyppi: 'yksi',
-          kysymys: 'Milloin toivoisit myyväsi?',
-          vaihtoehdot: ['Heti', '1–3 kk sisällä', 'Myöhemmin tänä vuonna', 'Vain kartoitan tilannetta'],
-          kentta: 'aikataulu',
-          jatkoviesti: 'Kiitos! Valitse vielä sinulle sopiva päivä maksuttomaan arviokäyntiin.',
+          kysymys: 'Millainen tapahtuma on kyseessä?',
+          vaihtoehdot: ['🎪 Festivaali', '🏢 Yritystapahtuma', '💍 Häät', '⭐ VIP-tilaisuus', '📣 Markkinointikampanja', '💬 Muu'],
+          kentta: 'tapahtumanTyyppi',
         },
         {
           tyyppi: 'kalenteri',
-          kentta: 'varattuAika',
+          kentta: 'tapahtumanPaiva',
         },
         {
           tyyppi: 'yhteystietolomake',
-          jatkoviesti: 'Hienoa! Jätä vielä yhteystietosi, niin vahvistamme ajan.',
+          jatkoviesti: 'Kiitos! Jätä vielä yhteystietosi, niin lähetämme tarjouksen.',
         },
       ],
     },
-  };
+    };
     // Käynnistää minkä tahansa kyselyMaarityksiin määritellyn kyselyn
   function aloitaKysely(kyselyId) {
     const kysely = kyselyMaaritykset[kyselyId];
