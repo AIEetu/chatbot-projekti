@@ -14,11 +14,8 @@ app.use(express.json());
 app.use(express.static('public'));
 
 const avaimet = {
-  'turun-lukko': process.env.OPENAI_API_KEY_TURUN_LUKKO,
-  'auto-mauno': process.env.OPENAI_API_KEY_AUTO_MAUNO,
-'metsaranta-koti': process.env.OPENAI_API_KEY_METSARANTA,
 'kivijalka-koti': process.env.OPENAI_API_KEY_KIVIJALKA,
-'metsapolkuelainklinikka': process.env.OPENAI_API_KEY_METSAELAIN_KLINIKKA
+'muistox': process.env.OPENAI_API_KEY_MUISTOX,
 };
 const HUBSPOT_OMISTAJA_ID = '97707912';
 
@@ -26,6 +23,7 @@ const HUBSPOT_OMISTAJA_ID = '97707912';
 const sheetsOsoitteet = {
   'turun-lukko': process.env.GOOGLE_SHEETS_URL_TURUN_LUKKO,
   'kivijalka-koti': process.env.GOOGLE_SHEETS_URL_KIVIJALKA,
+  'muistox': process.env.GOOGLE_SHEETS_URL_MUISTOX,
 };
 
 // Reitti: antaa widgetille asiakkaan asetukset (nimi, värit, tervehdys)

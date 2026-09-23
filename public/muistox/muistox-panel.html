@@ -1034,8 +1034,8 @@
       fetch('/api/tapahtuma', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          asiakas: 'kivijalka-koti',
+                body: JSON.stringify({
+          asiakas: 'muistox',
           tapahtuma: tapahtuma,
           lisatieto: lisatieto || '',
           istuntoId: istuntoId,
@@ -1160,7 +1160,7 @@
     el.addEventListener('click', () => {
       const toiminto = el.dataset.valikko;
       if (toiminto === 'myynti-kysely') aloitaKysely('myynti-kysely-v2');
-      else if (toiminto === 'osto-kysely') aloitaOstokysely();
+      else if (toiminto === 'osto-kysely') aloitaKysely('muistox-tarjous');
       else if (toiminto === 'goto-kohteet') { showView('view-kohteet'); paivitaAlapalkki(''); }
       else if (toiminto === 'open-contact') openContactModal();
       else if (toiminto === 'koti') { showView('view-home'); paivitaAlapalkki('koti'); }
@@ -1267,7 +1267,7 @@
       const vastaus = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kysymys, asiakas: 'kivijalka-koti' })
+        body: JSON.stringify({ kysymys, asiakas: 'muistox' })
       });
       const data = await vastaus.json();
       kirjoittaa.remove();
@@ -1356,7 +1356,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            asiakas: 'kivijalka-koti',
+            asiakas: 'muistox',
             palvelu: 'Yhteydenotto (vapaa chat)',
             nimi, puhelin, sahkoposti,
             viesti: alkuperainenKysymys
@@ -1475,23 +1475,25 @@
     kontti.style.flexDirection = 'column';
     kontti.style.width = '100%';
 
-    kontti.innerHTML = `
+     kontti.innerHTML = `
       <input class="form-field" type="text" id="geen-nimi" placeholder="Nimi" style="margin:0;">
       <input class="form-field" type="tel" id="geen-puhelin" placeholder="Puhelinnumero" style="margin:0;">
       <input class="form-field" type="email" id="geen-sahkoposti" placeholder="Sähköposti" style="margin:0;">
+      <input class="form-field" type="text" id="geen-kaupunki" placeholder="Kaupunki" style="margin:0;">
       <button class="offer-cta" id="geen-laheta" style="width:100%;">Lähetä tiedot</button>
     `;
 
     chatMessages.appendChild(kontti);
     panelScroll.scrollTop = panelScroll.scrollHeight;
 
-    document.getElementById('geen-laheta').addEventListener('click', async () => {
+        document.getElementById('geen-laheta').addEventListener('click', async () => {
       const nimi = document.getElementById('geen-nimi').value.trim();
       const puhelin = document.getElementById('geen-puhelin').value.trim();
       const sahkoposti = document.getElementById('geen-sahkoposti').value.trim();
+      const kaupunki = document.getElementById('geen-kaupunki').value.trim();
 
-      if (!nimi || !puhelin) {
-        alert('Täytä ainakin nimi ja puhelinnumero.');
+      if (!nimi || !puhelin || !kaupunki) {
+        alert('Täytä ainakin nimi, puhelinnumero ja kaupunki.');
         return;
       }
 
@@ -1502,15 +1504,15 @@
         .map(([kentta, arvo]) => `${kentta}: ${arvo}`)
         .join(', ');
 
-      try {
+            try {
         await fetch('/api/tarjous', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            asiakas: 'kivijalka-koti',
+            asiakas: kysely.asiakas || 'muistox',
             palvelu: kysely.palvelu,
-            nimi, puhelin, sahkoposti,
-            viesti,
+            nimi, puhelin, sahkoposti, kaupunki,
+            viesti: `${viesti}${viesti ? ', ' : ''}kaupunki: ${kaupunki}`,
             ...vastaukset,
           }),
         });
@@ -1869,7 +1871,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            asiakas: 'kivijalka-koti',
+            asiakas: 'muistox',
             palvelu: 'Myyntikysely / arviokäyntipyyntö',
             nimi, puhelin, sahkoposti, osoite,
             viesti,
@@ -2034,7 +2036,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            asiakas: 'kivijalka-koti',
+            asiakas: 'muistox',
             palvelu: 'Asunnonhaku',
             nimi, puhelin, sahkoposti,
             viesti,
@@ -2094,7 +2096,7 @@
       else if (action === 'open-contact') openContactModal();
       else if (action === 'chat') sendToChat(btn.dataset.text);
       else if (action === 'myynti-kysely') aloitaKysely('myynti-kysely-v2');
-      else if (action === 'osto-kysely') aloitaOstokysely();
+      else if (action === 'osto-kysely') aloitaKysely('muistox-tarjous');
     });
   });
 
@@ -2133,8 +2135,8 @@
       await fetch('/api/tarjous', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          asiakas: 'kivijalka-koti',
+               body: JSON.stringify({
+          asiakas: 'muistox',
           palvelu: 'Suora yhteydenotto (Viestit / Ota yhteyttä)',
           nimi, puhelin, sahkoposti,
           viesti
