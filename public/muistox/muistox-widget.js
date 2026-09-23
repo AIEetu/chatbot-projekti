@@ -1,7 +1,7 @@
 (function () {
   const RENDER_OSOITE = 'https://chatbot-projekti.onrender.com';
-  const PAAVARI = '#c1653f';
-  const PAAVARI_TUMMA = '#9c4d2f';
+    const PAAVARI = '#d9ae49';
+  const PAAVARI_TUMMA = '#b3872b';
 
   // ---- kelluva launcher-nappi ----
   const nappi = document.createElement('button');
@@ -27,10 +27,10 @@
   // pieni pulssirengas huomion herättämiseksi
   const rengas = document.createElement('style');
   rengas.textContent = `
-    @keyframes kivijalkaPulssi {
-      0% { box-shadow: 0 0 0 0 rgba(193,101,63,0.5); }
-      80% { box-shadow: 0 0 0 14px rgba(193,101,63,0); }
-      100% { box-shadow: 0 0 0 14px rgba(193,101,63,0); }
+        @keyframes kivijalkaPulssi {
+      0% { box-shadow: 0 0 0 0 rgba(217,174,73,0.5); }
+      80% { box-shadow: 0 0 0 14px rgba(217,174,73,0); }
+      100% { box-shadow: 0 0 0 14px rgba(217,174,73,0); }
     }
   `;
   document.head.appendChild(rengas);
@@ -38,8 +38,8 @@
 
   // ---- iframe (paneeli), piilotettuna aluksi ----
   const ikkuna = document.createElement('iframe');
-  ikkuna.src = RENDER_OSOITE + '/kivijalka-panel.html';
-  ikkuna.title = 'Kivijalka Koti -keskustelu';
+    ikkuna.src = RENDER_OSOITE + '/muistox-panel.html';
+  ikkuna.title = 'Muistox -keskustelu';
   ikkuna.style.cssText = `
     position: fixed;
     bottom: 24px; right: 24px;
